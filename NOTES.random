@@ -1,0 +1,22 @@
+As it happens, random numbers are not particularly important to SSPH
+because the back channel from SSPH to the client SP is through the
+database server.
+
+These URLs might be interesting for generating session cookies.
+
+http://lxr.free-electrons.com/source/arch/x86/include/asm/archrandom.h#L35
+
+	GPL RDRAND implementation 
+
+http://en.wikipedia.org/wiki/Hardware_random_number_generator
+	note von Neumann bias reduction
+
+http://scruss.com/blog/2013/06/07/well-that-was-unexpected-the-raspberry-pis-hardware-random-number-generator/
+	pi has hardware random numbers
+
+http://vk5tu.livejournal.com/43059.html
+
+http://security.stackexchange.com/questions/47475/testing-a-hardware-random-number-generator
+	references the dieharder randomness suite
+
+
