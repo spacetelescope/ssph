@@ -2,47 +2,68 @@
 -- SSPH.
 
 CREATE TABLE sp_info (
-	sp	VARCHAR,
+	sp	VARCHAR(50) NOT NULL,
 		-- name of the application
-	url	VARCHAR,
+	url	VARCHAR(250) NOT NULL,
 		-- url that successful logins are returned to
-	dbtype	VARCHAR,
-		-- type of database the client uses
-		--  name of a supported pandokia database driver
+	dbtype	VARCHAR(20) DEFAULT NULL,
+		-- The type of database the *client* uses for the ssph_auths
+		-- table.  This is name of a pandokia database driver
+		-- module without the "pandokia.db_" in front of it.  That is
+		-- "XYZ" would perform "import pandokia.db_XYZ"
+		--
+		-- If NULL, it means the application uses the same database
+		-- that this table is in, and dbcreds is ignored.
 		-- 
-	dbcreds	VARCHAR,
-		-- JSON of credentials to access the client database
+	dbcreds	VARCHAR(250) DEFAULT "",
+		-- JSON of credentials to access the *client's* database
 		-- (i.e. access_arg value for PandokiaDB object)
 	expiry	INTEGER DEFAULT 7200,
-		-- seconds that authentications are cached for this app
-	contact	VARCHAR(255)
+		-- duration in seconds that new authentications are
+		-- cached for this app.  Should be >= the duration that
+		-- the SSO will accept another login without a password.
+	contact	VARCHAR(255) NOT NULL,
 		-- STScI contacts for this service provider, human readable
+	email	varchar(255)
+		-- email address for contact for this service provider
 	);
 
 CREATE UNIQUE INDEX idx_sp_info
 	ON sp_info ( sp );
 
+
+-- ssph_auths lists the recently validated authentications.  The client
+-- has two options:
+--  - if the client record in sp_info has dbtype of NULL, the table
+--    below is used.  The client must have drivers and access to the
+--    database used by the ssph server.
+--  - if sp_info is the name of a pandokia database driver, then dbcreds
+--    are the credentials for the database that the ssph_auths table
 --
--- This is the table of authenticated session cookies.  This table exists
--- in the core database that belongs to SSPH so that applications need
--- not 1) keep their own database for this information, or 2) maintain
--- expirations in this table.
+-- In either case, applications are expected to maintain their own
+-- session cookies.  This table gets the application session cookie
+-- to the point where the application knows *who* it was issued to.
+-- After that, the application ignores the entry in this table.
 --
--- In either case, applications are expected to recognize expired cookies
--- on their own.
+-- The expire here is just for cleaning the database.  If the table
+-- is in the ssph database, then ssph is responsible for cleaning
+-- it.  If the table is in the client database, then the client is
+-- responsible for cleaning it.
 --
 
 CREATE TABLE ssph_auths (
-	sp	VARCHAR,
+	sp	VARCHAR(50) NOT NULL,
 		-- service provider that this record applies to
-	cookie	VARCHAR,
+	cookie	VARCHAR(250) NOT NULL,
 		-- session cookie that was authenticated
-	blob	VARCHAR,
+	blob	VARCHAR(15000) NOT NULL,
 		-- json blob of "interesting" data
-	expire	INTEGER
+	expire	INTEGER NOT NULL,
 		-- time_t to expire the session cookie.
+	idp	VARCHAR(250) NOT NULL,
+	eppn	VARCHAR(250) NOT NULL
 	-- application may place other columns here, as long as
-	-- they have DEFAULT or are not "NOT NULL"
+	-- they have DEFAULT or can be NULL.
 	);
 
 CREATE UNIQUE INDEX key_authentications 

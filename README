@@ -6,8 +6,8 @@ understanding of SAML.  But, whoever set up your IDP can give you
 an Apache server that uses Shibboleth to authenticate access to a
 directory on that server.
 
-SSPH is a few CGI programs that offer an easy way for non-Apache
-web servers (e.g. Tornado) to get Shibboleth authentication from
+SSPH is a simple CGI program that offers an easy way for non-Apache
+web servers (e.g. Tornado) to get Shibboleth authentication through
 an Apache server that has SSPH installed.
 
 SSPH is currently scoped to provide user authentication only.  It
@@ -15,7 +15,7 @@ is assumed that your application will track authorization and
 perform access control.
 
 SSPH does not implement anonymous users, but your application
-can by following certain conventions.
+can by simply not directing the anonymous users through SSPH.
 
 --
 Overview:
@@ -24,13 +24,14 @@ Your SP offers a LOGIN button that redirects to a specific URL on the
 Apache/Shibboleth server.  This URL includes your application's
 session cookie.
 
-SSPH is configured to know your SP and insert authentication notes
+SSPH is configured to know your SP and insert authentication results
 directly into a database table.  
 
 If the user succeeds in authenticating, they will be redirected back
-to a pre-configured URL on your application web site.  You will
-then check the table for your session cookie.  If it is there,
-it will be accompanied by information about the user who was
+to a pre-configured URL on your application web site.  
+
+You check the table for whether your session cookie is authenticated.
+If it is, it will be accompanied by information about the user who was
 authenticated.  If it is not, somebody is trying to spoof you.
 
 --
@@ -43,11 +44,11 @@ choose these for your service:
 		after authenticating)
 	database type and access credentials (see below for details)
 
-Enter these items into the table sp_info.
+Enter the name and return URL into the table sp_info.
 
 Make your LOGIN button go to
 	https://etcbrady.stsci.edu/Shibboleth.sso/Login?
-		target=https://etcbrady.stsci.edu/secure/return.cgi?
+		target=https://etcbrady.stsci.edu/secure/ssph.cgi?
 		sp=name,cookie
 
 	name is the name of your application
@@ -66,7 +67,7 @@ When the user comes back to RETURN_URL:
 The blob will be JSON encoding of whatever information Shibboleth provided
 in the environment for the authenticated cgi.
 
-Your application MUST CONFIRM that it had issued the session cookie.
+Your application MUST CONFIRM that it issued the session cookie.
 If your application did not issue the session cookie, then it is
 likely a spoof.
 

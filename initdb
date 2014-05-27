@@ -1,0 +1,10 @@
+rm -rf testdb
+mkdir testdb
+
+sqlite3 testdb/x.db < schema_core.sql
+
+sqlite3 testdb/x.db << ARF
+INSERT INTO sp_info VALUES ( 'jwstetc.banana:4460', 'http://banana:4460/', 'same', '', 3600, 'mark', 'sienkiew@stsci.edu' );
+ARF
+chmod 777 testdb
+chmod 666 testdb/x.db

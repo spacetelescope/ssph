@@ -4,13 +4,14 @@ import cgi
 import os
 import re
 import json
+import time
 
-from ssph.db import core_db
+from ssph_server.db import core_db
 
 def run() :
     data = cgi.FieldStorage()
     sp, cookie = data['sp'].value.split(',',1)
-    c = core_db.execute("SELECT url, dbtype, dbcreds FROM sp_info WHERE sp = :1",(sp,))
+    c = core_db.execute("SELECT url, dbtype, dbcreds, expiry FROM sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
         print "Content-type: text/plain"
@@ -18,7 +19,7 @@ def run() :
         print "Do not know your application ",sp
         return 0
     
-    url, dbtype, dbcreds = ans
+    url, dbtype, dbcreds, expire = ans
 
     url = url + "?c=" + cookie
 
@@ -30,7 +31,7 @@ def run() :
 
     blob = json.dumps( blob )
 
-    if dbtype == "same" :
+    if dbtype is None or dbtype == "same" :
         cdb = core_db
     else :
         exec "import pandokia.db_%s as cdbm" % dbtype
@@ -42,9 +43,13 @@ def run() :
             """,
             ( sp, cookie )
         )
-    cdb.execute("""INSERT INTO ssph_auths ( sp, cookie, blob )
-        VALUES ( :1, :2, :3 )""",
-        ( sp, cookie, blob )
+    cdb.execute("""INSERT INTO ssph_auths 
+            ( sp, cookie, blob, expire, idp, eppn )
+            VALUES ( :1, :2, :3, :4, :5, :6 )""",
+            ( sp, cookie, blob, time.time() + expire,
+                os.environ['Shib_Identity_Provider'],
+                os.environ['eppn']
+            )
         )
 
     cdb.commit()

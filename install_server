@@ -6,11 +6,19 @@ DOCUMENTROOT=/var/www/html
 #
 HERE=`pwd`
 PYTHON=`which python`
+LBRYPATH=$HERE/lib
 
 mkdir -p $DOCUMENTROOT/secure 
 
 # Note that /secure must run .cgi scripts
 # /secure is protected by shibboleth authentication
 
-sed -e "s?SSPH_PYTHON_PATH?$HERE?g" -e "s?PYTHON?$PYTHON?" < return.cgi  > $DOCUMENTROOT/secure/return.cgi
+sed \
+	-e "s?SSPH_PYTHON_PATH?$HERE?g" \
+	-e "s?PYTHON?$PYTHON?" \
+	-e "s?LBRYPATH?$LBRYPATH?" \
+	< ssph.cgi  > $DOCUMENTROOT/secure/ssph.cgi
+
+chmod +x $DOCUMENTROOT/secure/ssph.cgi
+
 
