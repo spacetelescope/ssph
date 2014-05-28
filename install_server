@@ -3,22 +3,32 @@
 # DOCUMENTROOT is the only part you need to edit
 DOCUMENTROOT=/var/www/html
 
-#
-HERE=`pwd`
-PYTHON=`which python`
+# where various third party packages are installed
+HERE=`pwd`/packages
+
+# add to LD_LIBRARY_PATH before loading third party packages
 LBRYPATH=$HERE/lib
 
-mkdir -p $DOCUMENTROOT/secure 
+# which python we are using
+PYTHON=`which python`
+
+mkdir -p $DOCUMENTROOT/secure $DOCUMENTROOT/unsecured
 
 # Note that /secure must run .cgi scripts
 # /secure is protected by shibboleth authentication
+sedme() {
+	rm -f $2
+	sed \
+		-e "s?SSPH_PYTHON_PATH?$HERE?g" \
+		-e "s?PYTHON?$PYTHON?" \
+		-e "s?LBRYPATH?$LBRYPATH?" \
+		-e "s?MODULE?$3?" \
+		< $1 > $2
+	chmod +x $2
+}
 
-sed \
-	-e "s?SSPH_PYTHON_PATH?$HERE?g" \
-	-e "s?PYTHON?$PYTHON?" \
-	-e "s?LBRYPATH?$LBRYPATH?" \
-	< ssph.cgi  > $DOCUMENTROOT/secure/ssph.cgi
+sedme ssph.cgi $DOCUMENTROOT/secure/ssph.cgi return_
+sedme ssph.cgi $DOCUMENTROOT/unsecured/ssph_confirm.cgi confirm
 
-chmod +x $DOCUMENTROOT/secure/ssph.cgi
 
 

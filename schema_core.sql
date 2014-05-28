@@ -15,18 +15,26 @@ CREATE TABLE sp_info (
 		-- If NULL, it means the application uses the same database
 		-- that this table is in, and dbcreds is ignored.
 		-- 
-	dbcreds	VARCHAR(250) DEFAULT "",
+	dbcreds	VARCHAR(250) DEFAULT NULL,
 		-- JSON of credentials to access the *client's* database
 		-- (i.e. access_arg value for PandokiaDB object)
 	expiry	INTEGER DEFAULT 7200,
 		-- duration in seconds that new authentications are
 		-- cached for this app.  Should be >= the duration that
 		-- the SSO will accept another login without a password.
-	contact	VARCHAR(255) NOT NULL,
+	contact	VARCHAR(250) NOT NULL,
 		-- STScI contacts for this service provider, human readable
-	email	varchar(255)
+	email	VARCHAR(250),
 		-- email address for contact for this service provider
+	confirm_mode CHAR(1) DEFAULT 'd',
+		-- 'c' means this SP uses the cgi to confirm authentications
+		-- 'd' means this SP uses database accesses
+	secret	VARCHAR(250) DEFAULT NULL,
+		-- if confirm_mode = 'c', the shared secret for the handshake
+	hash	VARCHAR(10) DEFAULT 'sha1'
+		-- if confirm_mode = 'c', the hash type to use for the handshake
 	);
+
 
 CREATE UNIQUE INDEX idx_sp_info
 	ON sp_info ( sp );
@@ -56,8 +64,10 @@ CREATE TABLE ssph_auths (
 		-- service provider that this record applies to
 	cookie	VARCHAR(250) NOT NULL,
 		-- session cookie that was authenticated
-	blob	VARCHAR(15000) NOT NULL,
-		-- json blob of "interesting" data
+	info	VARCHAR(8000) NOT NULL,
+		-- json of "interesting" data
+		--  8000 is "maximum allowed for any data type" according to
+		--  pymssql
 	expire	INTEGER NOT NULL,
 		-- time_t to expire the session cookie.
 	idp	VARCHAR(250) NOT NULL,
