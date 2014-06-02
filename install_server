@@ -7,7 +7,7 @@ DOCUMENTROOT=/var/www/html
 HERE=`pwd`/packages
 
 # add to LD_LIBRARY_PATH before loading third party packages
-LBRYPATH=$HERE/lib
+LBRYPATH=`pwd`/lib
 
 # which python we are using
 PYTHON=`which python`
@@ -23,12 +23,22 @@ sedme() {
 		-e "s?PYTHON?$PYTHON?" \
 		-e "s?LBRYPATH?$LBRYPATH?" \
 		-e "s?MODULE?$3?" \
-		< $1 > $2
-	chmod +x $2
+		< $1 > $2.py
+	# This is to hack around LD_LIBRARY_PATH; it doesn't work to
+	# change LD_LIBRARY_PATH after starting python.
+	# When the environment passed down from Apache has the right
+	# dynamic libraries available, you can just write the .py
+	# file directly into the .cgi
+	(
+		echo '#!/bin/sh'
+		echo "export LD_LIBRARY_PATH=$LBRYPATH"
+		echo "exec python $2.py"
+	) > $2
+	chmod +x $2 
 }
 
 sedme ssph.cgi $DOCUMENTROOT/secure/ssph.cgi return_
+sedme ssph.cgi $DOCUMENTROOT/secure/ssph_admin.cgi admin
+
 sedme ssph.cgi $DOCUMENTROOT/unsecured/ssph_confirm.cgi confirm
-
-
 

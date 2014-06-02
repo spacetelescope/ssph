@@ -1,11 +1,12 @@
 #!PYTHON
 # This hook is modified and used for each cgi that gets installed
 import sys
+import os
+
 import cgitb
 cgitb.enable()
 
 if "LBRYPATH" != "" :
-	import os
 	x=os.environ.get("LD_LIBRARY_PATH",None)
 	if x :
 		os.environ["LD_LIBRARY_PATH"] = x + ":LBRYPATH"

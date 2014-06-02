@@ -54,25 +54,32 @@ def ssph_validate( sp, cookie, secret=None, hashclass=None, url=None, garbage = 
     return json.loads(info)
 
 if __name__ == '__main__' :
+    import hashlib
+
+    # set this to describe an SP 
+    sp = 'jwstetc.banana:4460'
+    hashclass = hashlib.md5
+    secret = 'foobar'
+
+    # set this to a cookie that has an auth in the db
+    cookie1 = '56.1401464172.0'
+    cookie1= '2.1401486864.0'
+
+    # set this to a cookie that does not have an auth in the db
+    cookie2 = '1231242141224'
+
     if 1 :
-        print ssph_validate( 
-            sp='jwstetc.banana:4460',
-            cookie='52.1401226168.0',
-            )
+        # works, replies with a valid response
+        print ssph_validate( sp=sp, cookie= cookie1, hashclass = hashclass, secret=secret )
         print ""
 
     if 0 :
-        print ssph_validate( 
-            sp='jwstetc.banana:4460',
-            cookie='52.1401226168.1',
-            )
+        # cookie not know, barfs
+        print ssph_validate( sp=sp, cookie= cookie2, hashclass = hashclass, secret=secret )
         print ""
 
     if 0 :
-        print ssph_validate(
-            sp='jwstetc.banana:4460',
-            cookie='52.1401226168.0',
-            secret='wrong one'
-            )
+        # signed with wrong secret, barfs
+        print ssph_validate( sp=sp, cookie= cookie1, hashclass = hashclass, secret=secret+"xx" )
         print ""
 

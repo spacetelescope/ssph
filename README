@@ -44,7 +44,7 @@ choose these for your service:
 		after authenticating)
 	database type and access credentials (see below for details)
 
-Enter the name and return URL into the table sp_info.
+Enter the name and return URL into the table ssh_sp_info.
 
 Make your LOGIN button go to
 	https://etcbrady.stsci.edu/Shibboleth.sso/Login?
@@ -77,4 +77,34 @@ session cookies.
 Later feature:
 
 some way to generate cryptographic session cookies.
+
+
+--
+
+Installing SSPH
+
+SSPH is a set of small python programs.
+
+always required:
+	pip install pandokia
+
+for Microsoft SQL Server support:
+
+	install freetds RPMs
+	pip install pymssql
+
+for MySQL support:
+
+	install mysql client library RPMs
+	install MySQLdb from docs at
+		http://mysql-python.sourceforge.net/MySQLdb.html
+
+for Postgres support:
+	install postgres client library RPMs
+	pip install psycopg2
+		docs at http://initd.org/psycopg/docs/
+
+n.b. There is one database for SSPH, but it can connect directly to the
+database of the SP to confirm the authentications.  In that case, you
+may need more than one database client.
 

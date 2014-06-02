@@ -88,7 +88,7 @@ def run() :
     ###
     # look up information about the service provider
 
-    c = core_db.execute("SELECT confirm_mode, secret, hash FROM sp_info WHERE sp = :1",(sp,))
+    c = core_db.execute("SELECT confirm_mode, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
         # The service provider is not known to us.  We cannot proceed.

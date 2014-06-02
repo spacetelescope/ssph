@@ -35,7 +35,7 @@ def run() :
 
     ###
     # look up information about the service provider
-    c = core_db.execute("SELECT url, dbtype, dbcreds, expiry FROM sp_info WHERE sp = :1",(sp,))
+    c = core_db.execute("SELECT url, dbtype, dbcreds, expiry FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
         # hm - we do not know your SP; you lose.
@@ -70,19 +70,25 @@ def run() :
     # We will put the information collected on the authenticated user
     # into a database table, indexed by Service Provider and session cookie.
     # There are two choices of database:
-    #   - put it in our database ("same"); the SP needs read access to
+    #   - put it in our database ("ssph"); the SP needs read access to
     #     the ssph_auths table in our database.
     #   - put it into the SP's database.  We will need access/authentication
     #     to write to the ssph_auths table in the SP's database.
-    if dbtype is None or dbtype == "same" :
+    if dbtype is None or dbtype == "ssph" :
         # if using our database, we just use the already open handle
         cdb = core_db
     else :
         # if using their database, we have to connect to it.
         # (exec is ok because we got dbtype from our own configuration data)
-        exec "import pandokia.db_%s as cdbm" % dbtype
+        print "content-type: text/plain"
+        print ""
+        print dbtype
+        exec "import pandokia.db_%s as client_dbm" % dbtype
         dbcreds = json.loads(dbcreds)
-        cdb = cdbm.PandokiaDB( dbcreds )
+        print ""
+        print dbcreds
+        print ""
+        cdb = client_dbm.PandokiaDB( dbcreds )
 
     ###
     # Delete the record that is already there and insert a new one.

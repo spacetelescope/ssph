@@ -1,7 +1,7 @@
 -- This is the schema for the core database.  This database belongs to
 -- SSPH.
 
-CREATE TABLE sp_info (
+CREATE TABLE ssph_sp_info (
 	sp	VARCHAR(50) NOT NULL,
 		-- name of the application
 	url	VARCHAR(250) NOT NULL,
@@ -36,16 +36,16 @@ CREATE TABLE sp_info (
 	);
 
 
-CREATE UNIQUE INDEX idx_sp_info
-	ON sp_info ( sp );
+CREATE UNIQUE INDEX idx_ssph_sp_info
+	ON ssph_sp_info ( sp );
 
 
 -- ssph_auths lists the recently validated authentications.  The client
 -- has two options:
---  - if the client record in sp_info has dbtype of NULL, the table
+--  - if the client record in ssph_sp_info has dbtype of NULL, the table
 --    below is used.  The client must have drivers and access to the
 --    database used by the ssph server.
---  - if sp_info is the name of a pandokia database driver, then dbcreds
+--  - if dbtype is the name of a pandokia database driver, then dbcreds
 --    are the credentials for the database that the ssph_auths table
 --
 -- In either case, applications are expected to maintain their own
