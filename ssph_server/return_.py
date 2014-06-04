@@ -80,14 +80,8 @@ def run() :
     else :
         # if using their database, we have to connect to it.
         # (exec is ok because we got dbtype from our own configuration data)
-        print "content-type: text/plain"
-        print ""
-        print dbtype
         exec "import pandokia.db_%s as client_dbm" % dbtype
         dbcreds = json.loads(dbcreds)
-        print ""
-        print dbcreds
-        print ""
         cdb = client_dbm.PandokiaDB( dbcreds )
 
     ###

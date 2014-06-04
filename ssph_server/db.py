@@ -67,8 +67,8 @@ if 0 :
 # database: microsoft sql server
 
 if 1 :
-    # set environ before the import
-    os.environ['TDSVER'] = '8.0'
+    # set environ before the import -- oops, too late!
+    # os.environ['TDSVER'] = '8.0'
     import pandokia.db_pymssql as d
     core_db = d.PandokiaDB( {
             'user'          : 'jwstetc_user',

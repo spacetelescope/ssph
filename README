@@ -21,42 +21,67 @@ can by simply not directing the anonymous users through SSPH.
 Overview:
 
 Your SP offers a LOGIN button that redirects to a specific URL on the
-Apache/Shibboleth server.  This URL includes your application's
-session cookie.
+SSPH server.  This URL includes your application's session cookie as a
+CGI argument.
 
-SSPH is configured to know your SP and insert authentication results
-directly into a database table.  
+SSPH authenticates your user.  The authentication information (i.e. who
+the user is) is inserted into a database table.
 
-If the user succeeds in authenticating, they will be redirected back
-to a pre-configured URL on your application web site.  
+The user is then redirected back to a URL on your SP.
 
-You check the table for whether your session cookie is authenticated.
-If it is, it will be accompanied by information about the user who was
-authenticated.  If it is not, somebody is trying to spoof you.
+There are two options for your SP:
+
+- You can configure SSPH to insert the authentication directly into
+  your database.  You confirm the authentication by looking up your
+  session cookie in the table. (SPDB mode)
+
+- You confirm the authentication by asking SSPH if it has authenticated
+  the session cookie. (SSPHDB mode)
+
+This system depends on your client choosing cryptographically strong
+session cookies.
 
 --
-
-Your client:
-
-choose these for your service:
-	name (private between you and SSPH)
-	return URL (where users are redirected back to your web app
-		after authenticating)
-	database type and access credentials (see below for details)
-
-Enter the name and return URL into the table ssh_sp_info.
+Setting up your SP as a client of SSPH
 
 Make your LOGIN button go to
 	https://etcbrady.stsci.edu/Shibboleth.sso/Login?
 		target=https://etcbrady.stsci.edu/secure/ssph.cgi?
-		sp=name,cookie
+		sp=NAME,cookie
 
-	name is the name of your application
+	NAME is the name of your application
 	cookie is a crypto session cookie
+
+Configure SSPH to recognize your SP:
+	https://etcbrady.stsci.edu/secure/ssph_admin.cgi
+
+	sp 		NAME that you used in the URL above
+	url		URL on your web server where the user will
+			return to after authentication
+	confirm_mode	'd' for SPDB mode (your own database) or
+			'c' for SSPHDB mode (connect to SSPH to
+				confirm logins)
+	dbtype		type of database you are using (blank
+			in SSPHDB mode)
+	dbcreds		JSON of database credentials (see below)
+			(blank in SSPHDB mode)
+	expiry		number of seconds after authentication
+			before SSPH may forget the authentication
+			event.
+	contact		names of people who manage your SP
+	email		email address of contacts for your SP
+	secret		shared secret for your SP to ask SSPH
+			to confirm authentication
+	hash		hash type to use with shared secret
+
 
 If the user succeeds in logging in, they will come to your application
 at
 	RETURN_URL?c=cookie
+
+
+--
+Confirming the authentication, SPDB mode
 
 When the user comes back to RETURN_URL:
 
@@ -67,12 +92,16 @@ When the user comes back to RETURN_URL:
 The blob will be JSON encoding of whatever information Shibboleth provided
 in the environment for the authenticated cgi.
 
-Your application MUST CONFIRM that it issued the session cookie.
-If your application did not issue the session cookie, then it is
-likely a spoof.
+Your application MUST ALSO CONFIRM that it issued the session cookie.
+If your application did not issue the session cookie, then it is likely
+a spoof.
 
-This protocol depends on your client choosing cryptographically strong
-session cookies.
+
+--
+Confirming the authentication, SSPHDB mode
+
+See documentation or example programs in clients/ in the source code
+
 
 Later feature:
 
