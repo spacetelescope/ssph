@@ -11,6 +11,7 @@ Edit the source code to grant permissions.
 permitted_eppn = (
     'sienkiew_stsci.edu@stsci.edu',
     'chanley_stsci.edu@stsci.edu',
+    'deighton_stsci.edu@stsci.edu',
     )
 
 # no edit beyond here
