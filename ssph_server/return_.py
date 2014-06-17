@@ -1,7 +1,7 @@
 """
 This module implements $DOCUMENTROOT/secure/ssph.cgi
 
-During the SSO dance, the user is redirected here, bounced to the SSO
+During the SSO dance, the user is directed here, bounced to the SSO
 machine by the Apache module, logs in on the SSO, then is bounced back
 here with valid authentication.  The authentication looks just like
 HTTP BASICAUTH, except with more environment variables.
@@ -29,7 +29,20 @@ def run() :
     # comes here as sp=...
 
     data = cgi.FieldStorage()
-    sp, cookie = data["sp"].value.split(",",1)
+    if "sp" in data :
+        sp, cookie = data["sp"].value.split(",",1)
+    else :
+        print "Content-type: text/plain"
+        print ""
+        print "SSO did not return the SP field"
+        print "CGI ARGS"
+        for x in data :
+            print data[x].value
+        print "ENVIRONMENT"
+        for x in sorted( [x for x in os.environ] ):
+            print "%s=%s"%(x,os.environ[x])
+        return 0
+    
     # sp is the name of the service provider
     # cookie is the session cooke that the service provider created
 
@@ -50,7 +63,7 @@ def run() :
     # url is where we will return the user to.  The SP will receive the
     # cookie in a GET transaction, and then can confirm that the cookie
     # now is associated with an authenticated user.
-    url = url + "?c=" + cookie
+    # url = url + "?c=" + cookie
 
     ###
     # info is all the information there is to report about the user.
