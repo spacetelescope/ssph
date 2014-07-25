@@ -9,9 +9,9 @@ Edit the source code to grant permissions.
 # put a list of eppn of people who are permitted to create an SP here.
 # These people can see and submit this form.
 permitted_eppn = (
-    'sienkiew_stsci.edu@stsci.edu',
-    'chanley_stsci.edu@stsci.edu',
-    'deighton_stsci.edu@stsci.edu',
+    'sienkiew@stsci.edu',
+    'chanley@stsci.edu',
+    'deighton@stsci.edu',
     )
 
 # no edit beyond here
@@ -83,7 +83,8 @@ html_page = """<html>
 def run() :
 
     if not os.environ['eppn'] in permitted_eppn :
-        print "status: 500\n\nnot permitted\n"
+        print "status: 500\n\nlogged in but not permitted to admin\n"
+        print "your eppn",os.environ['eppn']
         return 1
 
     # we never get here unless we are authorized IT people, so it is ok

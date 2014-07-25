@@ -122,7 +122,7 @@ def run() :
     # to the SP.
 
     print "Status: 303 See Other"
-    print "Location:",url
+    print "Location:",url+"?c="+cookie
     print ""
 
     return 0
