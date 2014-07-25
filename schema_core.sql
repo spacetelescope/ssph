@@ -89,3 +89,23 @@ CREATE TABLE ssph_auths (
 CREATE UNIQUE INDEX key_authentications 
 	on ssph_auths ( sp, cookie );
 
+
+-- rev 2 table
+
+CREATE TABLE ssph_auth_events (
+	tyme		CHAR(26) 	NOT NULL,
+			-- datetime.datetime.utcnow().isoformat(' ')
+	sp		VARCHAR(50) 	NOT NULL,
+			--
+	auth_event_id 	CHAR(128) 	NOT NULL,
+			-- see get_auth_event_id()
+	client_ip	VARCHAR(45) 	NOT NULL,
+			-- text representation
+	idp		VARCHAR(250) 	NOT NULL,
+	eppn		VARCHAR(250) 	NOT NULL,
+	attribs		VARCHAR(8000) 	NOT NULL,
+			-- json of "interesting" data from the SSO
+			--  8000 is "maximum allowed for any data type" according to
+			--  pymssql; could be larger in other databases.
+	consumed	CHAR(1) 	NOT NULL DEFAULT 'N'
+	);

@@ -27,7 +27,7 @@ except IOError :
 #####
 # database: sqlite
 
-if 0 :
+if 1 :
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
@@ -66,7 +66,7 @@ if 0 :
 #####
 # database: microsoft sql server
 
-if 1 :
+if 0 :
     # set environ before the import -- oops, too late!
     # os.environ['TDSVER'] = '8.0'
     import pandokia.db_pymssql as d
