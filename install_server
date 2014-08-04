@@ -37,10 +37,10 @@ sedme() {
 	chmod +x $2 
 }
 
-#sedme ssph.cgi $DOCUMENTROOT/secure/ssph.cgi 		return_
-sedme ssph.cgi $DOCUMENTROOT/secure/ssph_admin.cgi 	admin
-sedme ssph.cgi $DOCUMENTROOT/unsecured/ssph_confirm.cgi confirm
+sedme template.cgi $DOCUMENTROOT/secure/ssph_auth.cgi 		ssph_auth
 
-sedme ssph.cgi $DOCUMENTROOT/secure/ssph_auth.cgi 	ssph_auth
+sedme template.cgi $DOCUMENTROOT/secure/ssph_admin.cgi 		admin
+
+sedme template.cgi $DOCUMENTROOT/unsecured/ssph_confirm.cgi 	confirm
 
 

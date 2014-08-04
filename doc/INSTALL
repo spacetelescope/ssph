@@ -1,0 +1,36 @@
+Install a standard Linux machine with Apache
+
+Configure an HTTPS server to work with Shibboleth.  
+
+	/secure is protected by Shibboleth
+	/unsecured is not
+
+yum install these packages:
+	  freetds
+		client and libraries
+	* freetds-devel
+		developer tools
+
+	  mysql
+		client and libraries
+	  mysql-libs
+		(may be implied)
+	  mysql-devel
+		(probably not if MySQL-python works)
+	* MySQL-python
+		python driver for mysql
+
+	* sqlite
+		sqlite library and client
+
+	  postgresql
+		client programs an library
+	* python-psycopg2
+		python client
+
+easy_install pip
+
+pip install pymssql
+
+pip install ipaddr
+

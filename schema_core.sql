@@ -22,10 +22,6 @@ CREATE TABLE ssph_sp_info (
 	dbcreds	VARCHAR(250) DEFAULT NULL,
 		-- JSON of credentials to access the *client's* database
 		-- (i.e. access_arg value for PandokiaDB object)
-	expiry	INTEGER DEFAULT 7200,
-		-- duration in seconds that new authentications are
-		-- cached for this app.  (Though there is currently no
-		-- expiration mechanism.)
 	contact	VARCHAR(250) NOT NULL,
 		-- People responsible for this service provider,
 		-- human readable
@@ -46,58 +42,36 @@ CREATE UNIQUE INDEX idx_ssph_sp_info
 	ON ssph_sp_info ( sp );
 
 
--- ssph_auths lists the recently validated authentications.  The client
--- has two options:
---  - if the client record in ssph_sp_info has dbtype of NULL, the table
---    below is used.  The client must have drivers and access to this
---    table in the database used by the ssph server, or must use CGI 
---    confirmation.
---  - if dbtype is the name of a pandokia database driver, then dbcreds
---    are the credentials for the database that the ssph_auths table
+-- ssph_auth_events is a log of all authentication events.  This table
+-- exists in the main SSPH database, where it logs all successful events
+-- that come by.  If the SP uses database-based authentication, then
+-- this identical table must exist in the SP database, and the 
+-- authentication event is also inserted there.
+
+-- The client has two options:
+--
+--	dbtype='ssph'
+--		The SP must use the CGI validator to check authentication
+--		events.  This table only exists in the SSPH database.
+--
+--	dbtype=anything else
+--		The SP looks at its own table for validation
+--		authentication events.  dbtype is the name of the
+--		pandokia driver with "db_" taken off the front.
 --
 -- In either case, applications are expected to maintain their own
--- session cookies.  This table gets the application session cookie
--- to the point where the application knows *who* it was issued to.
--- After that, the application ignores the entry in this table.
+-- session cookies.  The auth_event_id is *not* a session cookie;
+-- the SP must make their own crypto-strong session cookie and issue
+-- it to the user.  One the SP has issued the user a session cookie,
+-- the record in this table is only useful as a log entry.
 --
--- The expire here is just for cleaning the database.  If the table
--- is in the ssph database, then ssph is responsible for cleaning
--- it.  If the table is in the client database, then the client is
--- responsible for cleaning it.  (Though no expiration is currently
--- implemented.)
---
-
-CREATE TABLE ssph_auths (
-	sp	VARCHAR(50) NOT NULL,
-		-- service provider that this record applies to
-	cookie	VARCHAR(250) NOT NULL,
-		-- session cookie that was authenticated
-	info	VARCHAR(8000) NOT NULL,
-		-- json of "interesting" data from the SSO
-		--  8000 is "maximum allowed for any data type" according to
-		--  pymssql; could be larger in other databases.
-	expire	INTEGER NOT NULL,
-		-- time_t to expire the session cookie.
-	idp	VARCHAR(250) NOT NULL,
-		-- Identity Provider that performed this authentication
-	eppn	VARCHAR(250) NOT NULL
-		-- identity of this user
-	-- application may place other columns here, as long as
-	-- they have DEFAULT or can be NULL.
-	);
-
-CREATE UNIQUE INDEX key_authentications 
-	on ssph_auths ( sp, cookie );
-
-
--- rev 2 table
 
 CREATE TABLE ssph_auth_events (
 	tyme		CHAR(26) 	NOT NULL,
 			-- datetime.datetime.utcnow().isoformat(' ')
 	sp		VARCHAR(50) 	NOT NULL,
-			--
-	auth_event_id 	CHAR(128) 	NOT NULL,
+			-- name of the SP
+	auth_event_id 	VARCHAR(128) 	NOT NULL,
 			-- see get_auth_event_id()
 	client_ip	VARCHAR(45) 	NOT NULL,
 			-- text representation
@@ -108,4 +82,10 @@ CREATE TABLE ssph_auth_events (
 			--  8000 is "maximum allowed for any data type" according to
 			--  pymssql; could be larger in other databases.
 	consumed	CHAR(1) 	NOT NULL DEFAULT 'N'
+			-- changed to Y when the SP receives the auth event, but
+			-- only 
 	);
+
+create index ssph_auth_events_id on
+	ssph_auth_events ( auth_event_id );
+

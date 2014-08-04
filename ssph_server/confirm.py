@@ -2,7 +2,12 @@
 This module implements $DOCUMENTROOT/unsecured/ssph_confirm.cgi; 
 
 Service Providers ask this CGI to confirm that a user is authenticated,
-and to fetch the information returned by the authentication.
+and to fetch the information returned by the authentication.  Since
+this URL is only used by the SPs, we know they must be within our
+service net.  Any request from outside our service net is an attack.
+
+For extra bonus security, we could keep an IP list of servers that
+host each SP, but I don't think it is worth the extra work.
 
 """
 import cgi
@@ -10,6 +15,7 @@ import hashlib
 import json
 import os
 import sys
+import ipaddr
 
 from ssph_server.db import core_db
 
@@ -65,10 +71,11 @@ def run() :
     remote_addr = os.environ["REMOTE_ADDR"] 
 
     ### write your own if statements here
-    if not remote_addr.startswith("130.167.") :
-        _barf("outside-access")
-    if int(remote_addr.split(".")[2]) < 128 :
-        _barf("outside-access")
+
+    if not ipaddr.ip_address(remote_addr) in ipaddr.IPNetwork(service_net) :
+        _barf()
+        sys.exit(1)
+    
     ###
 
     # Collect the fields of the query that was passed by the client.
@@ -76,8 +83,8 @@ def run() :
     data = cgi.FieldStorage()
     sp = data["sp"].value
         # the name of the SP that is the client here
-    cookie = data["cookie"].value
-        # the session cookie being validated
+    auth_event_id = data["auth_event_id"].value
+        # the session auth_event_id being validated
     garbage = data["garbage"].value
         # garbage is a salt chosen by the client.  It makes it 
         # slightly more difficult to attack the shared secret by
@@ -88,7 +95,7 @@ def run() :
     ###
     # look up information about the service provider
 
-    c = core_db.execute("SELECT confirm_mode, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
+    c = core_db.execute("SELECT dbtype, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
         # The service provider is not known to us.  We cannot proceed.
@@ -96,16 +103,16 @@ def run() :
         _barf(data, "sp-unk")
         return 1
 
-    confirm_mode, secret, hash = ans
+    dbtype, secret, hash = ans
 
     ###
     # This service provider is expected to use CGI confirmations?
     # If we do not expect it, then the SP should be looking directly into
     # a database somewhere and not using this interface.  If the SP
-    # is not expected to use the CGI, then this is an unneccessary
-    # attack vector.
+    # is not expected to use the CGI, then we do not need to allow
+    # this as an attack vector.
 
-    if confirm_mode != "c" :
+    if dbtype != "ssph" :
         # if this
         _barf(data, "mode")
         return 1
@@ -130,7 +137,7 @@ def run() :
     try :
         hash_ok = hash in hashlib.algorithms
     except AttributeError :
-        # old python versions
+        # python 2.6
         hash_ok = hash in ( "md5", "sha1", "sha224", "sha256", "sha384", "sha512" )
 
     if not hash_ok :
@@ -147,7 +154,7 @@ def run() :
     m.update(" ")
     m.update( sp )
     m.update(" ")
-    m.update( cookie )
+    m.update( auth_event_id )
     m.update(" ")
     m.update( secret )
 
@@ -160,13 +167,13 @@ def run() :
         return 1
 
     ###
-    # Look up the session cookie in the table of recent authentications.
-    # It should be impossible for the client to ask for a session cookie
-    # that has not been successfully authenticated.  That would imply either
-    # a buggy SP or an attack.
-    c = core_db.execute("""SELECT info FROM ssph_auths
-            WHERE sp = :1 AND cookie = :2""",
-            ( sp, cookie )
+    # Look up the authentication cookie in the table of recent
+    # authentications.  It should be impossible for the client to ask for
+    # a cookie that has not been successfully authenticated.  That would
+    # imply either a buggy SP or an attack.
+    c = core_db.execute("""SELECT attribs FROM ssph_auths
+            WHERE auth_event_id = :1 AND sp = :2 """,
+            ( auth_event_id, sp )
         )
     ans = c.fetchone()
     if ans is None :
@@ -175,22 +182,25 @@ def run() :
 
     # Finally, we have the information we are searching for.  This is
     # the data that was stored when the user was initially authenticated.
-    info = ans[0].strip()
+    attribs = ans[0].strip()
 
     ###
     # sign the returned info with the same shared secret so the client
     # knows it really came from us.  There is no salting here because
     # the client has already proven that it knows the secret.
     exec "m = hashlib.%s()" % hash
-    m.update(info)
+    m.update(attribs)
+    m.update(' ')
+    m.update(secret)
     signature = m.hexdigest()
 
     ###
     # send back 1 line of signature, then arbitrarily long information.
-    # (in practice, it is a single line of json.)
+    # (in practice, it is usually a single line of json, but it might
+    # be multi-line if somebody pretty printed it into the database.)
     print "content-type: text/plain"
     print ""
     print signature
-    print info
+    print attribs
     return 0
 

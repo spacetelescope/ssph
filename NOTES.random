@@ -1,6 +1,5 @@
-As it happens, random numbers are not particularly important to SSPH
-because the back channel from SSPH to the client SP is through the
-database server.
+SSPH counts on /dev/urandom to make crypto-strong random numbers of fairly long length.
+
 
 These URLs might be interesting for generating session cookies.
 
