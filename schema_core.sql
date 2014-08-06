@@ -27,9 +27,6 @@ CREATE TABLE ssph_sp_info (
 		-- human readable
 	email	VARCHAR(250),
 		-- email address for contact for this service provider
-	confirm_mode CHAR(1) DEFAULT 'd',
-		-- 'c' : this SP may use the cgi to confirm authentications
-		-- 'd' : this SP uses only database accesses
 	secret	VARCHAR(250) DEFAULT NULL,
 		-- if confirm_mode = 'c', the shared secret for the handshake
 	hash	VARCHAR(10) DEFAULT 'sha1'

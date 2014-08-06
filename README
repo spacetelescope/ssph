@@ -11,8 +11,8 @@ web servers (e.g. Tornado) to get Shibboleth authentication through
 an Apache server that has SSPH installed.
 
 SSPH is currently scoped to provide user authentication only.  It
-is assumed that your application will track authorization and
-perform access control.
+is assumed that your application will understand authorization and
+access control.
 
 SSPH does not implement anonymous users, but your application
 can by simply not directing the anonymous users through SSPH.
@@ -20,37 +20,47 @@ can by simply not directing the anonymous users through SSPH.
 --
 Overview:
 
-Your SP offers a LOGIN button that redirects to a specific URL on the
-SSPH server.  This URL includes your application's session cookie as a
-CGI argument.
+Your SP offers a LOGIN button that links to a specific URL on the
+SSPH server.  That URL includes the name of your SP.
 
 SSPH authenticates your user.  The authentication information (i.e. who
-the user is) is inserted into a database table.
+the user is) is inserted into a database table as the tuple
+( IDP, EPPN ).  
 
-The user is then redirected back to a URL on your SP.
+IDP is the Identity Provider; it identifies who confirmed the user's
+identity.  When multiple organizations join in a "federation", there
+is a different IDP for each one.
+
+EPPN is the name of the user who is logged in.  The EPPN is unique
+within a single IDP, but it would appear that a hostile IDP could
+return an arbitrary EPPN.  Therefore, the tuple of IDP and EPPN
+must be used together for user identification.
+
+SSPH is configured with the name of your SP, a URL to redirect
+back to your web application, and miscellaneous other configuration
+parameters.
+
+Once the user logs in, they are redirected back to your URL with
+the parameter "?evid=XXX" where XXX is a crypto-strong authentication
+event identifier.  Your application uses a back channel to ask SSPH
+who logged in and received that evid.  Now you know who they are.
 
 There are two options for your SP:
 
 - You can configure SSPH to insert the authentication directly into
-  your database.  You confirm the authentication by looking up your
-  session cookie in the table. (SPDB mode)
+  your database.  You confirm the authentication by looking up the
+  evid in your database table (Database Confirmation)
 
-- You confirm the authentication by asking SSPH if it has authenticated
-  the session cookie. (SSPHDB mode)
-
-This system depends on your client choosing cryptographically strong
-session cookies.
+- Your SP can ask a CGI on the SSPH server to confirm the evid for
+  you. (CGI Confirmation)
 
 --
 Setting up your SP as a client of SSPH
 
 Make your LOGIN button go to
-	https://etcbrady.stsci.edu/Shibboleth.sso/Login?
-		target=https://etcbrady.stsci.edu/secure/ssph.cgi?
-		sp=NAME,cookie
+	https://etcbrady.stsci.edu/secure/ssph_auth.cgi? sp=NAME
 
-	NAME is the name of your application
-	cookie is a crypto session cookie
+	NAME is the name of your SP as configured in SSPH
 
 Configure SSPH to recognize your SP:
 	https://etcbrady.stsci.edu/secure/ssph_admin.cgi
@@ -58,55 +68,36 @@ Configure SSPH to recognize your SP:
 	sp 		NAME that you used in the URL above
 	url		URL on your web server where the user will
 			return to after authentication
-	confirm_mode	'd' for SPDB mode (your own database) or
-			'c' for SSPHDB mode (connect to SSPH to
-				confirm logins)
-	dbtype		type of database you are using (blank
-			in SSPHDB mode)
-	dbcreds		JSON of database credentials (see below)
-			(blank in SSPHDB mode)
-	expiry		number of seconds after authentication
-			before SSPH may forget the authentication
-			event.
-	contact		names of people who manage your SP
+	dbtype		type of database you are using -- use
+			"ssph" if SSPH if you will use CGI Confirmation.
+	dbcreds		JSON of database credentials
+			(blank if using CGI Confirmation)
+	contact		real names of people who manage your SP
 	email		email address of contacts for your SP
-	secret		shared secret for your SP to ask SSPH
-			to confirm authentication
-	hash		hash type to use with shared secret
+	secret		shared secret between your SP and SSPH
+			for use with CGI Confirmation
+	hash		hash type to use with CGI Confirmation
 
 
 If the user succeeds in logging in, they will come to your application
 at
-	RETURN_URL?c=cookie
+	RETURN_URL?evid=XXX
 
 
 --
-Confirming the authentication, SPDB mode
+Confirming the authentication, Database Confirmation
 
-When the user comes back to RETURN_URL:
+When the user comes back to RETURN_URL, look in the table ssph_auth_events
+for the evid.  This table contains IDP, EPPN, and ATTRIBS that were
+returned by the Shibboleth system.
 
-	"SELECT blob FROM ssph_auths
-		WHERE sp = :1 AND cookie = :2"
-		( name, cookie )
-
-The blob will be JSON encoding of whatever information Shibboleth provided
-in the environment for the authenticated cgi.
-
-Your application MUST ALSO CONFIRM that it issued the session cookie.
-If your application did not issue the session cookie, then it is likely
-a spoof.
-
+Update the column "CONSUMED" to the value 'Y' so that a second attempt to
+use the same evid will be rejected.
 
 --
-Confirming the authentication, SSPHDB mode
+Confirming the authentication, CGI Confirmation
 
 See documentation or example programs in clients/ in the source code
-
-
-Later feature:
-
-some way to generate cryptographic session cookies.
-
 
 --
 
@@ -133,7 +124,7 @@ for Postgres support:
 	pip install psycopg2
 		docs at http://initd.org/psycopg/docs/
 
-n.b. There is one database for SSPH, but it can connect directly to the
-database of the SP to confirm the authentications.  In that case, you
-may need more than one database client.
+n.b. SSPH requires one database driver for itself.  If you will use
+Database Confirmation, you also need a driver for each type of
+database that the SP wants you to contact.
 

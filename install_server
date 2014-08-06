@@ -19,9 +19,7 @@ mkdir -p $DOCUMENTROOT/secure $DOCUMENTROOT/unsecured
 sedme() {
 	rm -f $2
 	sed \
-		-e "s?SSPH_PYTHON_PATH?$HERE?g" \
 		-e "s?PYTHON?$PYTHON?" \
-		-e "s?LBRYPATH?$LBRYPATH?" \
 		-e "s?MODULE?$3?" \
 		< $1 > $2.py
 	# This is to hack around LD_LIBRARY_PATH; it doesn't work to
@@ -31,6 +29,7 @@ sedme() {
 	# file directly into the .cgi
 	(
 		echo '#!/bin/sh'
+		echo "export PYTHONPATH=$HERE"
 		echo "export LD_LIBRARY_PATH=$LBRYPATH"
 		echo "exec python $2.py"
 	) > $2

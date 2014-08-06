@@ -1,0 +1,31 @@
+On your mysql server:
+
+create database ssph_demo;
+
+grant all on ssph_demo.* to ssph_demo_user@'%.stsci.edu' identified by 'some long password';
+
+...create tables from demo_schema.sql
+...create table ssph_auth_events and index from ../schema_core.sql
+
+python demo.py
+
+http://etcbrady.stsci.edu:4460/
+
+click on link for ssph admin
+
+enter new sp
+	sp		ssph_demo
+	url		http://etcbrady.stsci.edu:4460/login_return.html
+	dbtype		mysqldb
+	dbcreds
+			{
+			    "host"      : "banana.stsci.edu",
+			    "user"      : "ssph_demo_user",
+			    "passwd"    : "some long password",
+			    "db"        : "ssph_demo"
+			}
+	contact		Mark Sienkiewicz
+	email		sienkiew@stsci.edu
+	secret		na
+	hash		na
+

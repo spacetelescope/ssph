@@ -1,0 +1,37 @@
+<h1>SSPH DEMO</h1>
+<p>
+Auth: $auth<br>
+Cookie: $cookie<br>
+You are: $eppn<br>
+IDP: $idp<br>
+
+</ul>
+<li> The Login button is a GET/POST to SSPH.  SSPH runs as a CGI in an Apache server that is protected by SSO.
+<li> execution of the SSPH CGI means the authentication was successful
+<li> SSPH inserts a record of the authentication into the database
+<li> The SP checks for the authentication
+	<ul>
+	<li> via HTTP (with mutual shared secret authentication)
+	<li> by looking into its own database (if SSPH is configured to do put answers there)
+	</ul>
+</ul>
+</p>
+
+<p>
+The SSPH prototype on etcbrady.stsci.edu is using a Microsoft SQL Server database on ppsdevdb1 for its own configuration and data storage.
+</p>
+
+<p>
+This application is using a Postgres database running on banana.stsci.edu.  SSPH is inserting the authentication information directly into that database.  (It would have been MySQL except for some firewall issues.)
+</p>
+
+<hr>
+<a href="/protected.txt">Protected Content</a> <br>
+<br>
+<a href="/demo.py">Source Code</a> <br>
+<br>
+<a href="https://etcbrady.stsci.edu//secure/ssph_admin.cgi">ssph admin</a>
+<hr>
+<a href="https://etcbrady.stsci.edu/secure/ssph_auth.cgi?sp=ssph_demo"><h2>Login</h2></a>
+https://etcbrady.stsci.edu/secure/ssph_auth.cgi?sp=ssph_demo
+

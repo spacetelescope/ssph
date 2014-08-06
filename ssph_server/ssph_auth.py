@@ -41,7 +41,6 @@ import time
 import datetime
 
 from ssph_server.db import core_db
-from ssph_server.validate_sp_ip import validate_ip
 
 if debug:
     import cgitb
@@ -107,7 +106,7 @@ def run() :
     ###
     # look up information about the service provider
 
-    c = core_db.execute("SELECT url, dbtype, dbcreds, expiry FROM ssph_sp_info WHERE sp = :1",(sp,))
+    c = core_db.execute("SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
         # hm - we do not know your SP; you lose.
@@ -118,9 +117,7 @@ def run() :
         # bug: log the attack here.
         return 0
 
-    validate_ip( sp )
-    
-    return_url, dbtype, dbcreds, expire = ans
+    return_url, dbtype, dbcreds = ans
 
     ###
     # auth_event_id is a crypto-strong random identifier for this
@@ -170,16 +167,12 @@ def run() :
 
         insert_auth( cdb,  tyme, sp, auth_event_id, attribs  )
 
+
     ###
     # Redirect the user back to the SP.
 
-    if debug:
-        print "content-type: text/plain"
-        print ""
-        print url
-
     print "Status: 303 See Other"
-    print "Location:",url
+    print "Location:",return_url
     print ""
 
     return 0
