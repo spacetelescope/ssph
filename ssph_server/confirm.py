@@ -17,6 +17,11 @@ import os
 import sys
 import ipaddr
 
+service_net = "130.167.209.0/17"
+
+# bug: refuse auth for evid that is too old
+# bug: refuse auth for evid that was used before
+
 from ssph_server.db import core_db
 
 debug = True
@@ -72,7 +77,7 @@ def run() :
 
     ### write your own if statements here
 
-    if not ipaddr.ip_address(remote_addr) in ipaddr.IPNetwork(service_net) :
+    if not ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(service_net) :
         _barf()
         sys.exit(1)
     
@@ -83,12 +88,8 @@ def run() :
     data = cgi.FieldStorage()
     sp = data["sp"].value
         # the name of the SP that is the client here
-    auth_event_id = data["auth_event_id"].value
-        # the session auth_event_id being validated
-    garbage = data["garbage"].value
-        # garbage is a salt chosen by the client.  It makes it 
-        # slightly more difficult to attack the shared secret by
-        # intercepting multiple transactions
+    evid = data["evid"].value
+        # the session authentication event id being validated
     signature = data["sig"].value
         # the hash computed by the client of the input for this request
 
@@ -108,9 +109,9 @@ def run() :
     ###
     # This service provider is expected to use CGI confirmations?
     # If we do not expect it, then the SP should be looking directly into
-    # a database somewhere and not using this interface.  If the SP
-    # is not expected to use the CGI, then we do not need to allow
-    # this as an attack vector.
+    # its own database and not using this interface.  If the SP is not
+    # expected to use the CGI, then we do not need to allow this as a
+    # potential attack vector.
 
     if dbtype != "ssph" :
         # if this
@@ -131,9 +132,6 @@ def run() :
     ###
     # The different clients can be configured for different hash
     # algorithms.  Use the coolest one that the client supports.
-    # Notice that the choice of hash algorithms is in the SSPH
-    # database, so in principle you will never encounter this
-    # case, but mistakes happen.
     try :
         hash_ok = hash in hashlib.algorithms
     except AttributeError :
@@ -141,6 +139,9 @@ def run() :
         hash_ok = hash in ( "md5", "sha1", "sha224", "sha256", "sha384", "sha512" )
 
     if not hash_ok :
+        # Notice that the choice of hash algorithms is in the SSPH
+        # database, so in principle you will never encounter this
+        # case, but mistakes happen.
         _barf(data, "hash")
         return 1
 
@@ -150,11 +151,9 @@ def run() :
     # exec is ok because we know that hash is one of the strings from
     # hashlib.algorithms
     exec "m = hashlib.%s()" % hash
-    m.update(garbage)
-    m.update(" ")
     m.update( sp )
     m.update(" ")
-    m.update( auth_event_id )
+    m.update( evid )
     m.update(" ")
     m.update( secret )
 
@@ -171,9 +170,9 @@ def run() :
     # authentications.  It should be impossible for the client to ask for
     # a cookie that has not been successfully authenticated.  That would
     # imply either a buggy SP or an attack.
-    c = core_db.execute("""SELECT attribs FROM ssph_auths
+    c = core_db.execute("""SELECT attribs FROM ssph_auth_events
             WHERE auth_event_id = :1 AND sp = :2 """,
-            ( auth_event_id, sp )
+            ( evid, sp )
         )
     ans = c.fetchone()
     if ans is None :

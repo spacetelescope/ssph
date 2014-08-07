@@ -1,0 +1,107 @@
+Server Request for SSPH application
+--
+
+This request is part of the JWST ETC (Exposure Time Calculator).
+It interacts with the Shibboleth Single Sign on system.
+
+Dan Deighton knows how to configure the Shibboleth service into the
+web server, so he is a good candidate for installing the machines 
+ssph1 / ssph2.
+
+Jamie Lipinski can comment on security related issues.
+
+
+
+** This is not a test. **  I anticipate to start using these servers
+as soon as they are ready, and continue at least until the end of the
+JWST mission.
+
+I request:
+
+- two machines (running on separate hardware) to run this web service:
+
+	- named "ssph1" and "ssph2", or something similar
+
+	- these can be virtual machines, as long as the two machines
+	  are always on different hardware.  They use /dev/urandom for
+	  cryptographic randomness, so you need whatever you do VMs to
+	  ensure that they have a suitable entropy pool by the time
+	  the web server starts up.  If you have hardware that has the
+	  RANDM instruction, I can adapt my application to it.	(Or if
+	  you want to get a Raspberry Pi to make hardware random numbers,
+	  we can do that too.)
+
+	- Apache web server (standard RPMs adequate)
+
+	- mod_shib configured to use the *production* Shibboleth server
+
+	- /secure protected by Shibboleth
+
+	- /secure configured to run *.cgi as a CGI program
+
+	- /unsecured not protected at all
+
+	- /unsecured configured to run *.cgi as a CGI program
+
+	- Python (standard RPM adquate, even if it is 2.6)
+
+	- these RPMs installed:
+
+		freetds-devel
+		MySQL-python
+		sqlite
+		python-psycopg2
+
+		(these bring in several additional RPMs)
+
+	- these additional commands run as root:
+
+		easy_install pip
+		pip install pymssql
+		pip install ipaddr
+
+	- sudo access for me and Christine Slocum; used to install the
+	  SSPH application.  I have never had an opportunity to deploy
+	  the application in this system configuration, so I anticipate
+	  that some fixes may be necessary.
+
+I request:
+
+- one high-availabilty production Microsoft SQL server database for use
+  by these two servers.
+
+	- the database name is "ssph" or something similar.
+
+	- the user name "ssph_server" has permission to select,
+	  insert, update, and delete from tables "ssph_sp_info" and
+	  "ssph_auth_events";  For convenience, you may grant these
+	  permissions on all tables.
+
+	 - the user name "ssph_admin" has full access to control the
+	   database.
+
+  I will create and populate tables.
+
+  This database will handle on the order of 3 to 5 SQL statements
+  per successful login, plus occasional queries for monitoring and
+  administration.  Unsuccessful logins are logged by the Shibboleth
+  system.
+
+  I have no basis for estimating the actual disk usage of this
+  application.  If there are 2000 login events per day with 2000 bytes
+  per record, that comes to 120 MB per month.
+
+  That suggests that 1 GB of data space should be sufficient.  I will
+  write the application to periodically delete old records so that
+  sp_spaceused stays between about 50% and 80% of the allocated space.
+  You'll have to tell me the actual size of the allocated space.
+
+
+I request:
+
+- "https://ssph.stsci.edu" goes through the front door web proxies,
+ and then on to one of ssphvm1 or ssphvm2, with fail-over in the event
+ that one of them is unavailable.  There are no persistent connections.
+ There is no session affinity required.
+
+

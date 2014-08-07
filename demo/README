@@ -14,7 +14,7 @@ http://etcbrady.stsci.edu:4460/
 click on link for ssph admin
 
 enter new sp
-	sp		ssph_demo
+	sp		ssph_demo_db
 	url		http://etcbrady.stsci.edu:4460/login_return.html
 	dbtype		mysqldb
 	dbcreds
@@ -28,4 +28,17 @@ enter new sp
 	email		sienkiew@stsci.edu
 	secret		na
 	hash		na
+
+enter new sp
+	sp		ssph_demo_cgi
+	url		http://etcbrady.stsci.edu:4460/login_return.html
+	dbtype		ssph
+	dbcreds		{ }
+	contact		Mark Sienkiewicz
+	email		sienkiew@stsci.edu
+	secret		12345678
+	hash		sha512
+
+
+
 
