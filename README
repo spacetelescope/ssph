@@ -58,7 +58,10 @@ There are two options for your SP:
 Setting up your SP as a client of SSPH
 
 Make your LOGIN button go to
-	https://etcbrady.stsci.edu/secure/ssph_auth.cgi? sp=NAME
+	https://ssph.stsci.edu/secure/ssph_auth.cgi?sp=NAME
+
+	The test configuration is
+	https://etcbrady.stsci.edu/secure/ssph_auth.cgi?sp=NAME
 
 	NAME is the name of your SP as configured in SSPH
 
@@ -71,13 +74,12 @@ Configure SSPH to recognize your SP:
 	dbtype		type of database you are using -- use
 			"ssph" if SSPH if you will use CGI Confirmation.
 	dbcreds		JSON of database credentials
-			(blank if using CGI Confirmation)
+			{ } if using CGI Confirmation
 	contact		real names of people who manage your SP
-	email		email address of contacts for your SP
+	email		email addresses of contacts for your SP
 	secret		shared secret between your SP and SSPH
 			for use with CGI Confirmation
 	hash		hash type to use with CGI Confirmation
-
 
 If the user succeeds in logging in, they will come to your application
 at
@@ -94,10 +96,14 @@ returned by the Shibboleth system.
 Update the column "CONSUMED" to the value 'Y' so that a second attempt to
 use the same evid will be rejected.
 
+The application demo/demo.py shows actual code to do this in python.
+
 --
 Confirming the authentication, CGI Confirmation
 
-See documentation or example programs in clients/ in the source code
+ssph_client.cgi contains a function for authenticating in CGI mode.
+Documentation is feeble at the moment, but demo/demo.py has an example
+of its use.
 
 --
 
@@ -127,4 +133,8 @@ for Postgres support:
 n.b. SSPH requires one database driver for itself.  If you will use
 Database Confirmation, you also need a driver for each type of
 database that the SP wants you to contact.
+
+For high availability, you should use a high availability incoming proxy
+that can distribute across two or more instances of SSPH.  All instances
+should be configured to use the same high availability database.
 
