@@ -6,10 +6,10 @@ You are: $eppn<br>
 IDP: $idp<br>
 
 </ul>
-<li> The Login button is a GET/POST to SSPH.  SSPH runs as a CGI in an Apache server that is protected by SSO.
+<li> The Login button is a GET to SSPH.  SSPH runs as a CGI in an Apache server that is protected by SSO.
 <li> execution of the SSPH CGI means the authentication was successful
 <li> SSPH inserts a record of the authentication into the database
-<li> The SP checks for the authentication
+<li> The SP checks for the authentication one of these two ways:
 	<ul>
 	<li> via HTTP (with mutual shared secret authentication)
 	<li> by looking into its own database (if SSPH is configured to do put answers there)
@@ -18,20 +18,23 @@ IDP: $idp<br>
 </p>
 
 <p>
-The SSPH prototype on etcbrady.stsci.edu is using a Microsoft SQL Server database on ppsdevdb1 for its own configuration and data storage.
+The SSPH prototype on etcbrady.stsci.edu is using a sqlite3 database,
+but it has also been used with Microsoft SQL server and MySQL.
 </p>
 
 <p>
-This application is using a Postgres database running on banana.stsci.edu.  SSPH is inserting the authentication information directly into that database.  (It would have been MySQL except for some firewall issues.)
+This demo is using a MySQL database running on banana.stsci.edu.  In Database Confirmation mode, SSPH is
+inserting the authentication information directly into the applications database.  In CGI Confirmation mode,
+the client contacts a CGI running on the SSPH server to confirm authentications.
 </p>
 
 <hr>
-<a href="/protected.txt">Protected Content</a> <br>
+<a href="/protected.txt">Protected Content</a> is only visible when you log in.<br>
 <br>
-<a href="/demo.py">Source Code</a> <br>
+<a href="/demo.py">Source Code</a> for the demo is only visible when you log in.<br>
 <br>
-<a href="https://etcbrady.stsci.edu//secure/ssph_admin.cgi">ssph admin</a>
+<a href="$ssph_url">ssph admin</a> is a link to the SSPH admin page.  The list of administrators is in the source code.
 <hr>
-<a href="https://etcbrady.stsci.edu/secure/ssph_auth.cgi?sp=$my_sp_name"><h2>Login</h2></a>
-https://etcbrady.stsci.edu/secure/ssph_auth.cgi?sp=$my_sp_name
+<a href="$ssph_url/secure/ssph_auth.cgi?sp=$my_sp_name"><h2>Login</h2></a>
+$ssph_url/secure/ssph_auth.cgi?sp=$my_sp_name
 

@@ -40,5 +40,10 @@ enter new sp
 	hash		sha512
 
 
+cd demo
 
+edit demo.py and select one of the confirm modes at the top of the file
+
+ur_setup
+python demo.py
 

@@ -1,25 +1,24 @@
 #!/usr/bin/env python
 
+# set the url of the SSPH server
+ssph_url = 'https://etcbrady.stsci.edu'
+
+# select one of these methods of confirming the identity of the user
+# who logged in.
 if 0 :
+    # SSPH inserts the authentication into your database
     confirm_mode = 'db'
     my_sp_name = 'ssph_demo_db'
 
 if 1 :
+    # you ask SSPH for the authentication information
     confirm_mode = 'cgi'
     my_sp_name = 'ssph_demo_cgi'
-    ssph_confirm_url = 'https://etcbrady.stsci.edu/unsecured/ssph_confirm.cgi'
+    ssph_confirm_url = ssph_url+'/unsecured/ssph_confirm.cgi'
 
-import os
-import os.path
-import binascii
-import cgi
-import tornado.httpserver
-import tornado.ioloop
-import tornado.options
-import tornado.web
 
-import sys
-
+# This is the database used by this demo application, no matter which
+# confirmation method you choose above.
 import pandokia.db_mysqldb
 
 db = pandokia.db_mysqldb.PandokiaDB(
@@ -31,6 +30,23 @@ db = pandokia.db_mysqldb.PandokiaDB(
     }
     )
 
+# notice that this application does not use SSL, and therefore is
+# inherently insecure.  I just don't want to get in to the difficulty of
+# making this work with SSL.  Your app necessarily will have to have
+# SSL (well, really TLS), but the interaction with SSPH is the same.
+
+### end of configurable data
+
+import os
+import os.path
+import sys
+import binascii
+import cgi
+import tornado.httpserver
+import tornado.ioloop
+import tornado.options
+import tornado.web
+
 #######
 
 from tornado.options import define, options
@@ -41,10 +57,9 @@ import platform, os, time
 
 
 # the name of the session cookie
+# note: look in to httponly=true, secure=true for the cookie
+
 session_cookie_name='demo_session'
-
-# look in to httponly=true, secure=true for the cookie
-
 
 #####
 # object that performs the get/posts
@@ -124,10 +139,6 @@ class AppVector(tornado.web.RequestHandler) :
                     idp, eppn, attribs = x
 
             elif confirm_mode == 'cgi' :
-                import sys
-                for x in sys.path :
-                    print x
-
                 from ssph_client.cgi import ssph_validate, HashException, Refused
                 try :
                     attribs = ssph_validate( my_sp_name, evid=evid, secret='12345678', url=ssph_confirm_url )
@@ -251,7 +262,20 @@ class AppVector(tornado.web.RequestHandler) :
                 self.set_header( 'Content-type', "text/plain" )
             self.set_status( 200 )
             err = 'No err'
-            self.write(file_text.substitute (  { 'msg' : msg, 'cookie' : session_cookie, 'auth' : auth, 'err' : err, 'eppn' : eppn, 'idp' : idp, 'my_sp_name' : my_sp_name } ) )
+            self.write(
+                file_text.substitute (  
+                    { 
+                    'msg' : msg,
+                    'cookie' : session_cookie, 
+                    'auth' : auth, 
+                    'err' : err, 
+                    'eppn' : eppn, 
+                    'idp' : idp, 
+                    'my_sp_name' : my_sp_name,
+                    'ssph_url' : ssph_url,
+                     }
+                 ) 
+            )
 
         else :
             self.set_status(500)
