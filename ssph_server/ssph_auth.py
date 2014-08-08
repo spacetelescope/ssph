@@ -64,12 +64,12 @@ def create_auth_event_id() :
 
 ###
 # function to insert an authentication event into the database table
-def insert_auth( db, tyme, sp, auth_event_id, attribs ) :
+def insert_auth( db, tyme, sp, auth_event_id, attribs, consumed ) :
     db.execute(
-        """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, eppn, attribs )
-        VALUES ( :1, :2, :3, :4, :5, :6, :7 ) """,
+        """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, eppn, attribs, consumed )
+        VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
         ( tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["eppn"], attribs ) 
+            os.environ["Shib_Identity_Provider"], os.environ["eppn"], attribs, consumed ) 
         )
     db.commit()
 
@@ -183,13 +183,21 @@ def run() :
     # about time zones.
     tyme = datetime.datetime.utcnow().isoformat(' ')
 
-    ###
-    # log the authentication event in our table
-    insert_auth( core_db,  tyme, sp, auth_event_id, attribs  )
 
-    ###
-    # If the SP wants us to put it into their database, do that too
-    if dbtype != "ssph" :
+    if dbtype == "ssph" :
+        ###
+        # log the authentication event in our table. it is not consumed
+        insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'N'  )
+
+    else:
+        ###
+        # If the SP wants us to put it into their database, enter it in
+        # our database in the SP database.
+
+        # consumed=D to indicate that the CGI authenticator should never
+        # see a request to validate this authentication event.
+        insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'D'  )
+
         # if using the SP's database, we have to connect to it.
         # (exec is ok because we got dbtype from our trusted configuration data)
         exec "import pandokia.db_%s as client_dbm" % dbtype

@@ -16,6 +16,9 @@ import json
 import os
 import sys
 import ipaddr
+import datetime
+import iso8601
+import pytz
 
 service_net = "130.167.209.0/17"
 
@@ -25,6 +28,12 @@ service_net = "130.167.209.0/17"
 from ssph_server.db import core_db
 
 debug = True
+
+#####
+#
+# timdelta.total_seconds() not in python 2.6
+def total_seconds( td ) :
+    return td.seconds + td.days * (24 * 3600) + (td.microseconds / 1e6)
 
 #####
 #
@@ -46,15 +55,11 @@ def _barf(message) :
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
     remote = os.environ["REMOTE_ADDR"]
     server = os.environ["SERVER_ADDR"]
-    user = os.environ["REMOTE_USER"]
-        # yes, I know we can't trust REMOTE_USER, but we might as well
-        # gather it in case the attacker is stupid, or is not really
-        # an attacker.
 
     # log to the apache error log
     sys.stderr.write(
-        "\n\n\nATTACK ON SSPH? date: %s from: %s %s to: %s type: %s\n\n" 
-        % (datetime.datetime.now().isoformat(' '), remote, user, server, message) 
+        "\n\n\nATTACK ON SSPH? date: %s from: %s to: %s type: %s\n\n" 
+        % (datetime.datetime.now().isoformat(' '), remote, server, message) 
         )
     sys.stderr.flush()
 
@@ -170,8 +175,8 @@ def run() :
     # authentications.  It should be impossible for the client to ask for
     # a cookie that has not been successfully authenticated.  That would
     # imply either a buggy SP or an attack.
-    c = core_db.execute("""SELECT attribs FROM ssph_auth_events
-            WHERE auth_event_id = :1 AND sp = :2 """,
+    c = core_db.execute("""SELECT tyme, attribs FROM ssph_auth_events
+            WHERE auth_event_id = :1 AND sp = :2 AND consumed = 'N' """,
             ( evid, sp )
         )
     ans = c.fetchone()
@@ -181,7 +186,27 @@ def run() :
 
     # Finally, we have the information we are searching for.  This is
     # the data that was stored when the user was initially authenticated.
-    attribs = ans[0].strip()
+    tyme, attribs = ans
+
+    ###
+    # if it took the SP more than 5 minutes to check up on this user, I
+    # think something funky is going on.
+    if total_seconds( datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme) ) > 300 :
+        core_db.execute(
+            "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
+            ( evid, sp )
+            )
+        core_db.commit()
+        _barf("expired")
+        return 1
+
+    ###
+    # we have used this authentication record.  It may not be used again.
+    core_db.execute(
+        "UPDATE ssph_auth_events SET consumed = 'Y' WHERE auth_event_id = :1 AND sp = :2",
+        (  evid, sp )
+        )
+    core_db.commit()
 
     ###
     # sign the returned info with the same shared secret so the client

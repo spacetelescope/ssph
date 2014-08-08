@@ -79,8 +79,12 @@ CREATE TABLE ssph_auth_events (
 			--  8000 is "maximum allowed for any data type" according to
 			--  pymssql; could be larger in other databases.
 	consumed	CHAR(1) 	NOT NULL DEFAULT 'N'
-			-- changed to Y when the SP receives the auth event, but
-			-- only 
+			-- Possible values are:
+			--	N	the SP has not checked this event
+			--	Y	the SP has checked this event
+			--	E	the SP checked this event after it expired
+			--	D	the SP uses Database Confirmation, so CGI 
+			--		confirmation should never work
 	);
 
 create index ssph_auth_events_id on

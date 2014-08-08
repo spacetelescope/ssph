@@ -59,6 +59,7 @@ I request:
 		easy_install pip
 		pip install pymssql
 		pip install ipaddr
+		pip install iso8601
 
 	- sudo access for me and Christine Slocum; used to install the
 	  SSPH application.  I have never had an opportunity to deploy
