@@ -1,5 +1,15 @@
 #!/bin/sh
 #
+#
+# This is a hack to deal with the fact that I do not have root and
+# therefore have to set up various environment variables before running
+# the CGI.
+#
+# In a regular system, ssph_server and ssph_client would be installed
+# in python site-packages (along with all the other python pre-reqs)
+# and template.cgi would be installed without the shell script.
+#
+
 # DOCUMENTROOT is the only part you need to edit
 DOCUMENTROOT=/var/www/html
 
