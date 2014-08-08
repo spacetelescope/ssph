@@ -30,7 +30,7 @@ else:
 # In debug mode, we'll tell a client how they messed up.  Otherwise,
 # they get nothing but blanks.
 
-debug = True
+debug = False
 
 import sys
 import cgi
@@ -42,7 +42,7 @@ import datetime
 
 from ssph_server.db import core_db
 
-if debug:
+if debug :
     import cgitb
     cgitb.enable()
 
@@ -51,7 +51,7 @@ if debug:
 # I guess I could include a serial number, but getting the same two
 # 48 bit strings out of /dev/urandom in the same 0.15 second interval?
 # Seems pretty unlikely.
-def get_auth_event_id() :
+def create_auth_event_id() :
     import binascii
     # os.urandom gets that many bytes from /dev/urandom
     # Using %010x gets us an extra digit (from multiplying by 7)
@@ -114,7 +114,12 @@ def run() :
         print ""
         if debug :
             print "Do not know your application: ",sp
-        # bug: log the attack here.
+        sys.stderr.write(
+            "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
+            % (sp, datetime.datetime.now().isoformat() )
+            )
+        sys.stderr.flush()
+
         return 0
 
     return_url, dbtype, dbcreds = ans
@@ -124,7 +129,29 @@ def run() :
     # authentication event.  It has so many random bits that we assume it
     # is unique.
 
-    auth_event_id = get_auth_event_id()
+    auth_event_id = create_auth_event_id()
+
+    ###
+    # a note about session fixation:  Eve could log in here and get
+    # a valid evid.  She could then use a session fixation attack to
+    # cause Alice to log in as Eve by tricking her into using the 
+    # evid that was issued to Eve. Alice is then logged in as Eve, which
+    # presumably would raise some red flags when Alice returns to the
+    # application and sees "You are logged in as Eve".  The link that
+    # Eve provides has to go directly to the SP return_url.
+    #
+    # If Alice then uploads some valuable data, then Eve can log in
+    # another session to see it.  In the event that Alice does not
+    # notice she is logged in as Eve, she will also wonder where her
+    # data went next time she logs in.
+    #
+    # You could probably guard against this by having the SP make
+    # a crypto-cookie and passing it to SSPH.  Then you look for the same
+    # crypto-cookie coming back when loading the return_url on the SP and
+    # checking that the incoming evid matches the original crypto-cookie.
+    #
+    # I may come back and add this feature later, but this is insufficiently
+    # high risk for me to be concerned about how.
 
     ###
     # url is where we will return the user to.  It is the part of the
@@ -135,9 +162,13 @@ def run() :
     # attribs is all the information there is to report about the user.
     # It is all in environment variables.  I got this regex from Dan
     # Deighton when he set up my shibboleth-enabled apache server for
-    # testing.
+    # testing: "(STScI_|Shib_|[a-z_0-9])+"
+    # In fact, I don't think that is really the right way to do it,
+    # so I'm using the regex below.  Starts with STScI_ or starts
+    # with Shib_ or starts with a lower case letter or starts with _ .
+    # The rest is a letter, digit, _ or - .
     attribs = { }
-    shib_vars = re.compile("(STScI_|Shib_|[a-z_0-9])+")
+    shib_vars = re.compile("^(STScI_|Shib_|[a-z_])[A-Za-z0-9_-]*")
     for x in os.environ :
       if shib_vars.match(x):
         attribs[x] = os.environ[x]

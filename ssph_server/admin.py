@@ -8,11 +8,15 @@ Edit the source code to grant permissions.
 
 # put a list of eppn of people who are permitted to create an SP here.
 # These people can see and submit this form.
-permitted_eppn = (
-    'cslocum@stsci.edu',
-    'sienkiew@stsci.edu',
-    'chanley@stsci.edu',
-    'deighton@stsci.edu',
+permitted_users = (
+    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'sienkiew@stsci.edu' ),
+    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'cslocum@stsci.edu' ),
+    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'chanley@stsci.edu' ),
+    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'deighton@stsci.edu' ),
+    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'lipinski@stsci.edu' ),
+
+    # bug: add/change-to the real SSO when it is set up.
+
     )
 
 # no edit beyond here
@@ -27,9 +31,10 @@ from ssph_server.admin_text import html_page
 def run() :
 
     # BUG: include the IDP in this test
-    if not os.environ['eppn'] in permitted_eppn :
-        print "status: 500\n\nlogged in but not permitted to admin\n"
-        print "your eppn",os.environ['eppn']
+    if not ( os.environ["Shib_Identity_Provider"], os.environ['eppn'] ) in permitted_users :
+        print "status: 500\ncontent-type: text/plain\n"
+        print "\nlogged in but not permitted to admin\n"
+        print "you are ",os.environ["Shib_Identity_Provider"],os.environ['eppn']
         return 1
 
     # we never get here unless we are authorized IT people, so it is ok

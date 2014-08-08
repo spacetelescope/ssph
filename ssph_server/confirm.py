@@ -53,8 +53,8 @@ def _barf(message) :
 
     # log to the apache error log
     sys.stderr.write(
-        "\n\n\nATTACK ON SSPH? date: %s from: %s %s to: %s type: %s\n\n\n" 
-        % (datetime.datetime.now().isoformat(), remote, user, server, message) 
+        "\n\n\nATTACK ON SSPH? date: %s from: %s %s to: %s type: %s\n\n" 
+        % (datetime.datetime.now().isoformat(' '), remote, user, server, message) 
         )
     sys.stderr.flush()
 
@@ -119,14 +119,14 @@ def run() :
         return 1
 
     ###
-    # The client examples use the secret 12345678.  A production SSPH
-    # should not permit the default value in the example.  It's too
+    # The demo use the secret 12345678.  A production SSPH
+    # should not permit the demo value in the example.  It's too
     # much like setting your password to "password"
 
     if not debug :
         if secret == "12345678" :
             print "content-type: text/plain\n\nbarf\n"
-            print "---\n\nreally? you used the default secret in non-debug mode???\n\n---"
+            print "---\n\nreally? you used the demo secret in non-debug mode???\n\n---"
         return 1
 
     ###
@@ -185,8 +185,7 @@ def run() :
 
     ###
     # sign the returned info with the same shared secret so the client
-    # knows it really came from us.  There is no salting here because
-    # the client has already proven that it knows the secret.
+    # knows it really came from us.
     exec "m = hashlib.%s()" % hash
     m.update(attribs)
     m.update(' ')
