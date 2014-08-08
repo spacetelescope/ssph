@@ -1,3 +1,4 @@
+# admin_text.py - separates the html from the rest of the admin program
 html_page = """
 <html>
 <head>
@@ -28,7 +29,7 @@ html_page = """
 </tr><tr>
 <td> dbtype         </td> <td> <input type=text name=dbtype         > </td> <td> ssph, pymssql, mysqldb, psycopg2 </td>
 </tr><tr>
-<td valign=top> dbcreds        </td> <td> <textarea rows=10 cols=40 name=dbcreds>  </textarea> </td> <td valign=top> json of credentials    </td>
+<td valign=top> dbcreds </td> <td> <textarea rows=10 cols=40 name=dbcreds></textarea> </td> <td valign=top> json of credentials    </td>
 </tr><tr>
 <td> contact        </td> <td> <input type=text name=contact        > </td> <td> name of SP contacts    </td>
 </tr><tr>

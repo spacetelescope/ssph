@@ -119,12 +119,13 @@ def run() :
 
     if 'listau' in data:
         t = listtb( 'ssph_auth_events', 'ORDER BY tyme' )
-        print "content-type: text/html, 'ORDER BY tyme'"
+        print "content-type: text/html"
         print ""
         print t.get_html(headings=True)
         return 0
 
-    # this is not a form submission
+    # None of the CGI parameters were present, so this is not a form
+    # submission.  Show the user the form.
     print "content-type: text/html"
     print ""
     print html_page
@@ -132,6 +133,8 @@ def run() :
 
 def listtb( table, order_by='' ):
     import pandokia.text_table
+    # unremarkable way to shove the database table into a pandokia
+    # text_table and then display it as html.
     from ssph_server.db import core_db
     c = core_db.execute("select * from %s %s" % (table, order_by) )
     t = pandokia.text_table.text_table()
@@ -142,8 +145,4 @@ def listtb( table, order_by='' ):
         for col, value in enumerate(x) :
             t.set_value(row, col, value )
     return t
-
-if __name__ == '__main__' :
-    t = listsp()
-    print t.get_rst()
 
