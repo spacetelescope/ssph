@@ -1,0 +1,130 @@
+Comments from Bernie Simon, 2014-08-05, with my observations mixed in.
+        - Mark S.
+
+marked with
+qty     cat         description
+1       [fixed]     source code has been fixed
+2       [pending]   a fix is pending
+3       [notfixed]  true, but I don't think it needs to be fixed
+2       [consider]  something to think about
+4       [nobug]     not a bug 
+
+9       total (some issues in more than one category)
+
+All the [nobug] categorizations come from things that Bernie did not
+know about the python support libraries.
+
+
+>ssph_server/admin_text.py
+>       Two html errors, no closing </html> tag and an extra <tr> tag
+>       at the end of the first (topmost) table and form.
+
+[fixed]
+
+>
+>       probably would be more convenient to the user to use a selct
+>       list for the hash input.
+
+[notfixed]
+
+True, but the form gets submitted a couple times for each new application
+that is developed, so I didn't try to make it friendly.
+
+>
+>ssph_server/admin.py
+>       cgi data is not sanitized before inserting in database,
+>       possibly resulting in a xss attack.
+
+[notfixed]
+[consider]
+
+The admin cgi is only ever submitted by a system administrator.  I did not
+consider the threat vector sufficiently important.
+
+This raises the question of how much we trust our admins.  Anybody who
+can admin for their own app can admin for anybody.  I did not consider
+this worth working on, considering the low number of SP projects likely
+to use it, but perhaps it is worth revisiting.
+
+>
+>       The delete_sp code does not check its argument before
+>       inserting it into the delete command, leaving it open to an
+>       sql inkection attack.
+
+[nobug]
+[pending]
+
+It uses the pandokia database driver, which in turn uses one of various
+Python DBAPI 2.0 compliant drivers.  The point of the :1, :2, etc is
+that they are properly substited by the database drivers, therefore
+there are no sql injection attacks.
+
+This should be pointed out in the documentation.
+
+>
+>       As a rule, all input coming to a script is untrusted and
+>       should be sanitized before use by matching it against a 
+>       regular expression of valid values for that input.
+>
+>       The script would give a better appearance if each time it ran
+>       it returned the form. An area in the form should be reserved
+>       for the ouput, which should be interpolated before returning
+>       the form.
+
+[notfixed]
+
+I don't think this is important enough, given the expected usage and
+the expected user base for the admin interface.
+
+>
+>ssph_server/confirm.py
+>       The sp input field is not sanitized bedore inserting it in the
+>       selext, allowing an sql injection attack.
+
+[nobug]
+
+(DBAPI)
+
+>
+>       Any string interpolated into an sql statement must be
+>       sanitized by matching a regular espression before it is used
+>       in order to prevent a sql injection attack.
+>
+>ssph_server/db.py
+>       I'd prefer that a password be stored in a file that is not
+>       named password or anything similar, so that if the server is
+>       compromised by some other means, the intruder just can't scoop
+>       it up.
+
+[consider]
+
+Worth thinking about.
+
+>
+>ssph_server/ssph_auth.py
+>       As before, any input field used in an sql statement, must be
+>       sanitized before being used by mmatching it against a regular
+>       expression. 
+
+[nobug]
+
+(DBAPI)
+
+>
+>ssph_client/cgi.py
+>       It would probably be a better idea to check the return status
+>       of the GET when checking for errors rather than looking for
+>       the string "barf". That way you will catch unanticipated
+>       errors from the server instead of ject catching the errors you
+>       have checked for in the code yourself. Probably should check
+>       for a return status 400 or above.
+
+[nobug]
+[pending]
+
+HTTP 400 or 500 class errors will raise an exception.  This is buried in the
+python http client libraries, so it should be mentioned in the documentation.
+
+If there is a barf message, there may be additional information for diagnosing
+problems, but only in debug mode.
+
