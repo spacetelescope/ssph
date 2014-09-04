@@ -11,10 +11,10 @@ ssph1 / ssph2.
 Jamie Lipinski can comment on security related issues.
 
 
-
 ** This is not a test. **  I anticipate to start using these servers
 as soon as they are ready, and continue at least until the end of the
 JWST mission.
+
 
 I request:
 
@@ -66,6 +66,12 @@ I request:
 	  the application in this system configuration, so I anticipate
 	  that some fixes may be necessary.
 
+	- These machines should be monitored with the care that other
+	  SSO related systems receive.  The application is a CGI, and
+	  therefore will not be observed to be running on the machine.
+	  If you intend to monitor by speaking directly to the CGI,
+	  we can discuss what sort of transactions would be appropriate.
+
 I request:
 
 - one high-availabilty production Microsoft SQL server database for use
@@ -104,5 +110,14 @@ I request:
  and then on to one of ssphvm1 or ssphvm2, with fail-over in the event
  that one of them is unavailable.  There are no persistent connections.
  There is no session affinity required.
+
+ ssph.stsci.edu is a publicly available service.
+
+
+Other:
+
+- The position of these machines in the network is not important.
+  They can be DMZ or internal, as long as https://ssph.stsci.edu is
+  proxied to them.
 
 
