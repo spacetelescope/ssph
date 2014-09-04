@@ -38,7 +38,7 @@ html_page = """
 <td> secret         </td> <td> <input type=text name=secret         > </td> <td> SP shared secret       </td>
 </tr><tr>
 <td> hash           </td> <td> <input type=text name=hash           > </td> <td> md5, sha1, sha224, sha256, sha384, sha512 >/td>
-</tr><tr>
+</tr>
 </table>
 <input type=submit>
 </form>
@@ -67,4 +67,5 @@ html_page = """
 
 
 </body>
+</html>
 """
