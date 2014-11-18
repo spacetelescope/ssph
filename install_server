@@ -26,7 +26,7 @@ mkdir -p $DOCUMENTROOT/secure $DOCUMENTROOT/unsecured
 
 # Note that /secure must run .cgi scripts
 # /secure is protected by shibboleth authentication
-sedme() {
+sedme(){
 	rm -f $2
 	sed \
 		-e "s?PYTHON?$PYTHON?" \
@@ -44,12 +44,21 @@ sedme() {
 		echo "exec python $2.py"
 	) > $2
 	chmod +x $2 
+} 
+
+r_sedme() {
+	rm -f $2
+	PYTHON=`which python`
+	sed -e "s/MODULE/$3/" \
+		-e "s?PYTHON?$PYTHON?" < $1 > $2
+	chmod +x $2 
 }
 
-sedme template.cgi $DOCUMENTROOT/secure/ssph_auth.cgi 		ssph_auth
 
-sedme template.cgi $DOCUMENTROOT/secure/ssph_admin.cgi 		admin
+r_sedme template.cgi $DOCUMENTROOT/secure/ssph_auth.cgi 		ssph_auth
 
-sedme template.cgi $DOCUMENTROOT/unsecured/ssph_confirm.cgi 	confirm
+r_sedme template.cgi $DOCUMENTROOT/secure/ssph_admin.cgi 		admin
+
+r_sedme template.cgi $DOCUMENTROOT/unsecured/ssph_confirm.cgi 	confirm
 
 

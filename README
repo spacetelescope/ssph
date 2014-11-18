@@ -138,4 +138,33 @@ For high availability, you should use a high availability incoming proxy
 that can distribute across two or more instances of SSPH.  All instances
 should be configured to use the same high availability database.
 
+Install the server package:
+
+	cp -r ssph_server /usr/lib/python2.6/site-packages
+
+	vi /usr/lib/python2.6/site-packages/ssph_server/db.py
+
+	  password_file = '/usr/lib/python2.6/site-packages/ssph_server/pswd'
+
+	  enter the database configuration you want to use
+
+	  save file
+
+ 	enter database password into file
+
+	vi /usr/lib/python2.6/site-packages/ssph/password
+
+Change the owner/group/permissions to limit access to your apache user id.
+
+	chown apache /usr/lib/python2.6/site-packages/ssph_server/pswd
+	chgrp apache /usr/lib/python2.6/site-packages/ssph_server/pswd
+	chmod 600    /usr/lib/python2.6/site-packages/ssph_server/pswd
+
+Create the /secure and /unsecured urls on the server:
+
+	cd /var/www/html
+	mkdir secure unsecured
+
+changet install_server to use r_sedme instead of sedme
+
 
