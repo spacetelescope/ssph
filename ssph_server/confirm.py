@@ -41,7 +41,7 @@ def total_seconds( td ) :
 # odd enough to be worth logging/alerting for.
 #
 
-def _barf(message) :
+def _barf(data, message) :
     # if there is a reason to barf, we will just tell the client "barf"
     print "Content-type: text/plain"
     print ""
@@ -58,7 +58,7 @@ def _barf(message) :
 
     # log to the apache error log
     sys.stderr.write(
-        "\n\n\nATTACK ON SSPH? date: %s from: %s to: %s type: %s\n\n" 
+        "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n" 
         % (datetime.datetime.now().isoformat(' '), remote, server, message) 
         )
     sys.stderr.flush()
@@ -80,17 +80,12 @@ def run() :
     # to serve
     remote_addr = os.environ["REMOTE_ADDR"] 
 
-    ### write your own if statements here
-
-    if not ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(service_net) :
-        _barf()
-        sys.exit(1)
-    
     ###
 
     # Collect the fields of the query that was passed by the client.
     # Quietly ignore unexpected fields.
     data = cgi.FieldStorage()
+
     sp = data["sp"].value
         # the name of the SP that is the client here
     evid = data["evid"].value
@@ -98,6 +93,12 @@ def run() :
     signature = data["sig"].value
         # the hash computed by the client of the input for this request
 
+    ### write your own if statements here
+
+    if not ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(service_net) :
+        _barf(data,'ip-mismatch')
+        sys.exit(1)
+    
     ###
     # look up information about the service provider
 
@@ -181,7 +182,7 @@ def run() :
         )
     ans = c.fetchone()
     if ans is None :
-        _barf("cookie-missing")
+        _barf(data, "cookie-missing")
         return 1
 
     # Finally, we have the information we are searching for.  This is
@@ -197,7 +198,7 @@ def run() :
             ( evid, sp )
             )
         core_db.commit()
-        _barf("expired")
+        _barf(data, "expired")
         return 1
 
     ###

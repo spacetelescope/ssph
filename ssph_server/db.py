@@ -17,7 +17,7 @@ import os.path
 # The database password is stored in a separate file that belongs
 # to the apache user.  Here is the name of the file.
 
-password_file = "/data1/home/sienkiew/work/ssph/testdb/password"
+password_file = '/usr/lib/python2.6/site-packages/ssph_server/pswd'
 
 try :
     password = open( password_file, "r").readline().strip()
@@ -27,12 +27,12 @@ except IOError :
 #####
 # database: sqlite
 
-if 1 :
+if 0 :
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
     # of concurrent transactions.
-    core_db = d.PandokiaDB("/data1/home/sienkiew/work/ssph/testdb/x.db")
+    core_db = d.PandokiaDB("/tmp/test_ssph.db")
 
 #####
 # database: postgres
@@ -51,15 +51,15 @@ if 0 :
 #####
 # database: mysql
 
-if 0 :
+if 1 :
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
-            'host'      : 'goldtst',
-            'port'      : 23306,
-            'user'      : 'pyetc',
+            'host'      : 'localhost',
+            'port'      : 3306,
+            'user'      : 'ssph_admin',
             'passwd'    : password,
-            'db'        : 'pyetc1',
-            'use_unicode' : True,
+            'db'        : 'ssph',
+            'use_unicode' : False,
             }
         )
 
@@ -71,11 +71,11 @@ if 0 :
     # os.environ['TDSVER'] = '8.0'
     import pandokia.db_pymssql as d
     core_db = d.PandokiaDB( {
-            'user'          : 'jwstetc_user',
-            'server'        : 'ppsdevdb1',
+            'user'          : 'ssph_server',
+            'server'        : 'gatordb',
             'port'          : 1433,
             'password'      : password,
-            'database'      : 'jwst_sienkiew',
+            'database'      : 'ssph',
             # 'timeout'       : 0,
             # 'login_timeout' : 0,
             # 'appname'       : ???

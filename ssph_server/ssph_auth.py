@@ -30,7 +30,7 @@ else:
 # In debug mode, we'll tell a client how they messed up.  Otherwise,
 # they get nothing but blanks.
 
-debug = False
+debug = True
 
 import sys
 import cgi
@@ -106,6 +106,11 @@ def run() :
     ###
     # look up information about the service provider
 
+    #cmd = "SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = '%s'" % sp
+    #sys.stderr.write('CMD: %s' %cmd)
+    #sys.stderr.flush()
+    #c = core_db.execute(cmd)
+    #ans = c.fetchone()
     c = core_db.execute("SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
@@ -158,6 +163,10 @@ def run() :
     # SP that receives the authentication event.
     return_url = return_url + "?evid=" + auth_event_id
 
+    sys.stderr.write("\n\n%s" % (return_url))
+    sys.stderr.flush()
+
+
     ###
     # attribs is all the information there is to report about the user.
     # It is all in environment variables.  I got this regex from Dan
@@ -194,7 +203,7 @@ def run() :
         # If the SP wants us to put it into their database, enter it in
         # our database in the SP database.
 
-        # consumed=D to indicate that the CGI authenticator should never
+        # consumed=D to indicate that the CGI authenticaor should never
         # see a request to validate this authentication event.
         insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'D'  )
 
