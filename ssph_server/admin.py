@@ -6,13 +6,12 @@ Edit the source code to grant permissions.
 
 """
 
-# put a list of eppn of people who are permitted to create an SP here.
+# put a list of stsci_uuid of people who are permitted to create an SP here.
 # These people can see and submit this form.
 permitted_users = (
     ( 'https://ssoportal.stsci.edu/idp/shibboleth', 'sienkiew@stsci.edu' ),
     ( 'https://ssoportal.stsci.edu/idp/shibboleth', 'cslocum@stsci.edu' ),
-
-    )
+)
 
 # no edit beyond here
 #######
@@ -26,10 +25,10 @@ from ssph_server.admin_text import html_page
 def run() :
 
     # BUG: include the IDP in this test
-    if not ( os.environ["Shib_Identity_Provider"], os.environ['eppn'] ) in permitted_users :
+    if not ( os.environ["Shib_Identity_Provider"], os.environ['stsci_uuid'] ) in permitted_users :
         print "status: 500\ncontent-type: text/plain\n"
         print "\nlogged in but not permitted to admin\n"
-        print "you are ",os.environ["Shib_Identity_Provider"],os.environ['eppn']
+        print "you are ", os.environ["Shib_Identity_Provider"], os.environ['stsci_uuid']
         return 1
 
     # we never get here unless we are authorized IT people, so it is ok

@@ -66,10 +66,10 @@ def create_auth_event_id() :
 # function to insert an authentication event into the database table
 def insert_auth( db, tyme, sp, auth_event_id, attribs, consumed ) :
     db.execute(
-        """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, eppn, attribs, consumed )
+        """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, stsci_uuid, attribs, consumed )
         VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
         ( tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["eppn"], attribs, consumed ) 
+            os.environ["Shib_Identity_Provider"], os.environ["stsci_uuid"], attribs, consumed ) 
         )
     db.commit()
 
