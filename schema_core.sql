@@ -73,7 +73,7 @@ CREATE TABLE ssph_auth_events (
 	client_ip	VARCHAR(45) 	NOT NULL,
 			-- text representation
 	idp		VARCHAR(250) 	NOT NULL,
-	eppn		VARCHAR(250) 	NOT NULL,
+	stsci_uuid		VARCHAR(250) 	NOT NULL,
 	attribs		VARCHAR(8000) 	NOT NULL,
 			-- json of "interesting" data from the SSO
 			--  8000 is "maximum allowed for any data type" according to
