@@ -9,8 +9,8 @@ Edit the source code to grant permissions.
 # put a list of stsci_uuid of people who are permitted to create an SP here.
 # These people can see and submit this form.
 permitted_users = (
-    ( 'https://ssoportal.stsci.edu/idp/shibboleth', 'sienkiew@stsci.edu' ),
-    ( 'https://ssoportal.stsci.edu/idp/shibboleth', 'cslocum@stsci.edu' ),
+    # cslocum@stsci.edu
+    ( 'https://ssoportal.stsci.edu/idp/shibboleth', '00ff878d-bde1-4e46-82ef-c2e333452ed0' ),
 )
 
 # no edit beyond here
@@ -23,12 +23,11 @@ import os
 from ssph_server.admin_text import html_page
 
 def run() :
-
     # BUG: include the IDP in this test
-    if not ( os.environ["Shib_Identity_Provider"], os.environ['stsci_uuid'] ) in permitted_users :
+    if not ( os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'] ) in permitted_users :
         print "status: 500\ncontent-type: text/plain\n"
         print "\nlogged in but not permitted to admin\n"
-        print "you are ", os.environ["Shib_Identity_Provider"], os.environ['stsci_uuid']
+        print "you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']
         return 1
 
     # we never get here unless we are authorized IT people, so it is ok

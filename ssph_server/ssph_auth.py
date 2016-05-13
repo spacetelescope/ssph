@@ -69,7 +69,7 @@ def insert_auth( db, tyme, sp, auth_event_id, attribs, consumed ) :
         """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, stsci_uuid, attribs, consumed )
         VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
         ( tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["stsci_uuid"], attribs, consumed ) 
+            os.environ["Shib_Identity_Provider"], os.environ["STScI_UUID"], attribs, consumed ) 
         )
     db.commit()
 
@@ -178,9 +178,9 @@ def run() :
     # The rest is a letter, digit, _ or - .
     attribs = { }
     shib_vars = re.compile("^(STScI_|Shib_|[a-z_])[A-Za-z0-9_-]*")
-    for x in os.environ :
-      if shib_vars.match(x):
-        attribs[x] = os.environ[x]
+    for x in os.environ: 
+        if shib_vars.match(x):
+            attribs[x] = os.environ[x]
 
     ###
     # We store all the user attribs in a json block
@@ -224,4 +224,3 @@ def run() :
     print ""
 
     return 0
-
