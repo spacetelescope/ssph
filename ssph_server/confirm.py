@@ -20,7 +20,7 @@ import datetime
 import iso8601
 import pytz
 
-service_net = "130.167.209.0/17"
+service_net = ["130.167.209.0/17", "52.45.9.215/32"]
 
 # bug: refuse auth for evid that is too old
 # bug: refuse auth for evid that was used before
@@ -94,8 +94,11 @@ def run() :
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
-
-    if not ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(service_net) :
+    match = False
+    for i in service_net:
+        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(i) :
+	    match = True
+    if not match:
         _barf(data,'ip-mismatch')
         sys.exit(1)
     
