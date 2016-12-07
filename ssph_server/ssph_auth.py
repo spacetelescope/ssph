@@ -38,6 +38,7 @@ import re
 import json
 import time
 import datetime
+import re
 
 from ssph_server.db import core_db
 
@@ -101,6 +102,10 @@ def run() :
     
     # sp is now the name of the service provider
 
+    # validate sp; make sure the string only contains alphanumeric characters,
+    # dashes, underscores, and periods
+    if not re.match("^[A-Za-z0-9_:.-]*$", sp):
+        raise Exception('sp contains unsafe characters')
 
     ###
     # look up information about the service provider
