@@ -105,7 +105,7 @@ def run() :
     # validate sp; make sure the string only contains alphanumeric characters,
     # dashes, underscores, and periods
     if not re.match("^[A-Za-z0-9_:.-]*$", sp):
-        raise Exception('sp contains unsafe characters')
+	return 1
 
     ###
     # look up information about the service provider
