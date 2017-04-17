@@ -54,14 +54,15 @@ if 0 :
 if 1 :
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
-            'host'      : 'localhost',
+            'host'      : 'tlssphdbv1',
             'port'      : 3306,
-            'user'      : 'ssph_admin',
+            'user'      : 'etcadmin',
             'passwd'    : password,
             'db'        : 'ssph',
             'use_unicode' : False,
             }
         )
+
 
 #####
 # database: microsoft sql server
