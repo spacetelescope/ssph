@@ -11,6 +11,8 @@ Edit the source code to grant permissions.
 permitted_users = (
     # cslocum@stsci.edu
     ( 'https://ssoportal.stsci.edu/idp/shibboleth', '00ff878d-bde1-4e46-82ef-c2e333452ed0' ),
+    # cmesh@stsci.edu
+    ( 'https://ssoportal.stsci.edu/idp/shibboleth', 'faf7068c-34f7-4c1c-bdd6-535be7c9bb7a' ),
 )
 
 # no edit beyond here
