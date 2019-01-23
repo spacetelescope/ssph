@@ -11,8 +11,8 @@ Edit the source code to grant permissions.
 permitted_users = (
     # cslocum@stsci.edu
     ( 'https://ssoportal.stsci.edu/idp/shibboleth', '00ff878d-bde1-4e46-82ef-c2e333452ed0' ),
-    # cmesh@stsci.edu
-    ( 'https://ssoportal.stsci.edu/idp/shibboleth', 'faf7068c-34f7-4c1c-bdd6-535be7c9bb7a' ),
+    # olitten@stsci.edu
+    ( 'https://ssoportal.stsci.edu/idp/shibboleth', '2b73c1ee-90f9-4b24-87d5-6678dfd06276' ),
 )
 
 # no edit beyond here
@@ -72,7 +72,7 @@ def run() :
             dbcreds = json.dumps( json.loads( dbcreds ) )
 
         core_db.execute("""
-            INSERT INTO ssph_sp_info 
+            INSERT INTO ssph_sp_info
             ( sp, url, dbtype, dbcreds, contact, email, secret, hash )
             VALUES
             ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
@@ -92,7 +92,7 @@ def run() :
         print "content-type: text/plain"
         print ""
         print "done"
-        return 0 
+        return 0
 
     if 'delete_sp' in data :
         from ssph_server.db import core_db
@@ -140,4 +140,3 @@ def listtb( table, order_by='' ):
         for col, value in enumerate(x) :
             t.set_value(row, col, value )
     return t
-
