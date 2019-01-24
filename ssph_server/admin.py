@@ -6,18 +6,14 @@ Edit the source code to grant permissions.
 
 """
 
-# put a list of eppn of people who are permitted to create an SP here.
+# put a list of stsci_uuid of people who are permitted to create an SP here.
 # These people can see and submit this form.
 permitted_users = (
-    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'sienkiew@stsci.edu' ),
-    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'cslocum@stsci.edu' ),
-    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'chanley@stsci.edu' ),
-    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'deighton@stsci.edu' ),
-    ( 'https://sso-test.stsci.edu/idp/shibboleth',  'lipinski@stsci.edu' ),
-
-    # bug: add/change-to the real SSO when it is set up.
-
-    )
+    # cslocum@stsci.edu
+    ( 'https://ssoportal.stsci.edu/idp/shibboleth', '00ff878d-bde1-4e46-82ef-c2e333452ed0' ),
+    # olitten@stsci.edu
+    ( 'https://ssoportal.stsci.edu/idp/shibboleth', '2b73c1ee-90f9-4b24-87d5-6678dfd06276' ),
+)
 
 # no edit beyond here
 #######
@@ -29,12 +25,11 @@ import os
 from ssph_server.admin_text import html_page
 
 def run() :
-
     # BUG: include the IDP in this test
-    if not ( os.environ["Shib_Identity_Provider"], os.environ['eppn'] ) in permitted_users :
+    if not ( os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'] ) in permitted_users :
         print "status: 500\ncontent-type: text/plain\n"
         print "\nlogged in but not permitted to admin\n"
-        print "you are ",os.environ["Shib_Identity_Provider"],os.environ['eppn']
+        print "you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']
         return 1
 
     # we never get here unless we are authorized IT people, so it is ok
@@ -77,7 +72,7 @@ def run() :
             dbcreds = json.dumps( json.loads( dbcreds ) )
 
         core_db.execute("""
-            INSERT INTO ssph_sp_info 
+            INSERT INTO ssph_sp_info
             ( sp, url, dbtype, dbcreds, contact, email, secret, hash )
             VALUES
             ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
@@ -97,7 +92,7 @@ def run() :
         print "content-type: text/plain"
         print ""
         print "done"
-        return 0 
+        return 0
 
     if 'delete_sp' in data :
         from ssph_server.db import core_db
@@ -145,4 +140,3 @@ def listtb( table, order_by='' ):
         for col, value in enumerate(x) :
             t.set_value(row, col, value )
     return t
-

@@ -29,7 +29,6 @@ else:
 """
 # In debug mode, we'll tell a client how they messed up.  Otherwise,
 # they get nothing but blanks.
-
 debug = False
 
 import sys
@@ -39,6 +38,7 @@ import re
 import json
 import time
 import datetime
+import re
 
 from ssph_server.db import core_db
 
@@ -66,10 +66,10 @@ def create_auth_event_id() :
 # function to insert an authentication event into the database table
 def insert_auth( db, tyme, sp, auth_event_id, attribs, consumed ) :
     db.execute(
-        """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, eppn, attribs, consumed )
+        """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, stsci_uuid, attribs, consumed )
         VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
         ( tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["eppn"], attribs, consumed ) 
+            os.environ["Shib_Identity_Provider"], os.environ["STScI_UUID"], attribs, consumed )
         )
     db.commit()
 
@@ -99,13 +99,16 @@ def run() :
             for x in sorted( [x for x in os.environ] ):
                 print "%s=%s"%(x,os.environ[x])
         return 0
-    
+
     # sp is now the name of the service provider
 
+    # validate sp; make sure the string only contains alphanumeric characters,
+    # dashes, underscores, and periods
+    if not re.match("^[A-Za-z0-9_:.-]*$", sp):
+	return 1
 
     ###
     # look up information about the service provider
-
     c = core_db.execute("SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None :
@@ -134,7 +137,7 @@ def run() :
     ###
     # a note about session fixation:  Eve could log in here and get
     # a valid evid.  She could then use a session fixation attack to
-    # cause Alice to log in as Eve by tricking her into using the 
+    # cause Alice to log in as Eve by tricking her into using the
     # evid that was issued to Eve. Alice is then logged in as Eve, which
     # presumably would raise some red flags when Alice returns to the
     # application and sees "You are logged in as Eve".  The link that
@@ -158,6 +161,10 @@ def run() :
     # SP that receives the authentication event.
     return_url = return_url + "?evid=" + auth_event_id
 
+    sys.stderr.write("\n\n%s" % (return_url))
+    sys.stderr.flush()
+
+
     ###
     # attribs is all the information there is to report about the user.
     # It is all in environment variables.  I got this regex from Dan
@@ -169,9 +176,9 @@ def run() :
     # The rest is a letter, digit, _ or - .
     attribs = { }
     shib_vars = re.compile("^(STScI_|Shib_|[a-z_])[A-Za-z0-9_-]*")
-    for x in os.environ :
-      if shib_vars.match(x):
-        attribs[x] = os.environ[x]
+    for x in os.environ:
+        if shib_vars.match(x):
+            attribs[x] = os.environ[x]
 
     ###
     # We store all the user attribs in a json block
@@ -215,4 +222,3 @@ def run() :
     print ""
 
     return 0
-
