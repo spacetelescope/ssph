@@ -26,7 +26,7 @@ except IOError :
 
 #####
 # database: sqlite
-
+# MOVE THE DATABASE LOCATION BEFORE ACTUAL USE
 if 0 :
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
@@ -39,7 +39,7 @@ if 0 :
 
 if 0 :
     import pandokia.db_psycopg2 as d
-    core_db = d.PandokiaDB( { 
+    core_db = d.PandokiaDB( {
         'host'      : 'banana.stsci.edu',
         'port'      : 5432,
         'database'  : 'ssph',
@@ -81,7 +81,6 @@ if 0 :
             # 'login_timeout' : 0,
             # 'appname'       : ???
             # 'conn_properties': ???
-        
+
         }
         )
-
