@@ -17,7 +17,7 @@ import os.path
 # The database password is stored in a separate file that belongs
 # to the apache user.  Here is the name of the file.
 
-password_file = '/usr/lib/python2.6/site-packages/ssph_server/pswd'
+password_file = '/internal/data1/other/config'
 
 try :
     password = open( password_file, "r").readline().strip()
