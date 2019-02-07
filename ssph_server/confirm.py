@@ -20,7 +20,7 @@ import datetime
 import iso8601
 import pytz
 
-with servicefile as open('urllist.json','r')
+with open('urllist.json','r') as servicefile:
     service_net = json.load(servicefile)
 
 # bug: refuse auth for evid that is too old
@@ -96,8 +96,8 @@ def run() :
 
     ### write your own if statements here
     match = False
-    for i in service_net.values():
-        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(i) :
+    for url in service_net.values():
+        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)) :
 	    match = True
     if not match:
         _barf(data,'ip-mismatch')
