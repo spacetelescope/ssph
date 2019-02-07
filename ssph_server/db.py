@@ -54,10 +54,10 @@ if 0 :
 if 1 :
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
-            'host'      : 'tlssphdbv1', # plssphv1 for production
+            'host'      : 'plssphdbv1',
             'port'      : 3306,
             'user'      : 'etcadmin',
-            'passwd'    : password, # stored in /usr/lib/python2.6/site-packages/ssph_server/pswd
+            'passwd'    : password,
             'db'        : 'ssph',
             'use_unicode' : False,
             }
