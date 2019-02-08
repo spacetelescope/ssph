@@ -32,12 +32,6 @@ debug = True
 
 #####
 #
-# timdelta.total_seconds() not in python 2.6
-def total_seconds( td ) :
-    return td.seconds + td.days * (24 * 3600) + (td.microseconds / 1e6)
-
-#####
-#
 # Call this function whenever you think the client is doing something
 # odd enough to be worth logging/alerting for.
 #
@@ -96,6 +90,7 @@ def run() :
 
     ### write your own if statements here
     match = False
+    # service_net is now a dictionary, but we only want the values
     for url in service_net.values():
         if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)) :
 	    match = True
@@ -196,7 +191,8 @@ def run() :
     ###
     # if it took the SP more than 5 minutes to check up on this user, I
     # think something funky is going on.
-    if total_seconds( datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme) ) > 300 :
+    timeobj = datetime.timedelta(datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme))
+    if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
             ( evid, sp )
