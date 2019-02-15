@@ -90,7 +90,7 @@ def run() :
 
     data = cgi.FieldStorage()
     sys.stderr.write("Datacheck:\n")
-    sys.stderr.write(data)
+    sys.stderr.write(data['sp'].value.strip())
     sys.stderr.flush()
     if "sp" in data :
         sp = data["sp"].value.strip()
