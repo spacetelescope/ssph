@@ -83,6 +83,10 @@ def run() :
     # After the authentication, that single parameter comes here as
     # sp=... giving the name of the service provider that is requesting
     # service.
+    sys.stderr.write("REMOTE ADDR: {}".format(os.environ['REMOTE_ADDR']))
+    sys.stderr.write("Shib_Identity_Provider: {}".format(os.environ["Shib_Identity_Provider"]))
+    sys.stderr.write("STScI_UUID: {}".format(os.environ["STScI_UUID"]))
+    sys.stderr.flush()
 
     data = cgi.FieldStorage()
     if "sp" in data :
@@ -90,6 +94,7 @@ def run() :
     else :
         print "Content-type: text/plain"
         print ""
+        sys.stderr.write("No data")
         if debug :
             print "SSO did not return the SP field"
             print "CGI ARGS"
@@ -100,8 +105,8 @@ def run() :
                 print "%s=%s"%(x,os.environ[x])
         return 0
 
-    raise ValueError('Through Environment storage')
-
+    sys.stderr.write(data)
+    sys.stderr.flush()
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
