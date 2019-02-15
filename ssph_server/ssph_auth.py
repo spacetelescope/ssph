@@ -29,7 +29,7 @@ else:
 """
 # In debug mode, we'll tell a client how they messed up.  Otherwise,
 # they get nothing but blanks.
-debug = False
+debug = True
 
 import sys
 import cgi
