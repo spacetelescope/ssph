@@ -32,7 +32,7 @@ def ssph_validate( sp, evid, secret, hashclass=hashlib.sha512, url=default_url )
     m.update( secret )
 
     args["sig"] = m.hexdigest()
-    
+
     print "USING URL",url, args
     f = web.GET( url, args )
     hash = f.readline().strip()
@@ -52,13 +52,13 @@ def ssph_validate( sp, evid, secret, hashclass=hashlib.sha512, url=default_url )
 
 if __name__ == '__main__' :
 
-    # set this to describe an SP 
+    # set this to describe an SP
     sp = 'jwstetc.banana:4460'
     hashclass = hashlib.md5
     secret = 'foobar'
 
     # set this to a cookie that has an auth in the db
-    cookie1 = '56.1401464172.0'
+    #cookie1 = '56.1401464172.0'
     cookie1= '2.1401486864.0'
 
     # set this to a cookie that does not have an auth in the db
@@ -66,7 +66,7 @@ if __name__ == '__main__' :
 
     if 1 :
         # works, replies with a valid response
-        print ssph_validate( sp=sp, cookie= cookie1, hashclass = hashclass, secret=secret )
+        print ssph_validate( sp, cookie1, hashclass = hashclass, secret=secret )
         print ""
 
     if 0 :
@@ -78,4 +78,3 @@ if __name__ == '__main__' :
         # signed with wrong secret, barfs
         print ssph_validate( sp=sp, cookie= cookie1, hashclass = hashclass, secret=secret+"xx" )
         print ""
-

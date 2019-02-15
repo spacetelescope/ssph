@@ -100,6 +100,7 @@ def run() :
         _barf(data,'ip-mismatch')
         sys.exit(1)
 
+    raise ValueError('After url {}'.format(url))
     ###
     # look up information about the service provider
 
