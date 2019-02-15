@@ -108,7 +108,7 @@ def run() :
         return 0
 
     sys.stderr.write("Passed Data\n")
-    sys.stderr.write(data)
+    sys.stderr.flush()
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
@@ -207,11 +207,15 @@ def run() :
 
 
     if dbtype == "ssph" :
+        sys.stderr.write("Using SSPH db\n")
+        sys.stderr.flush()
+
         ###
         # log the authentication event in our table. it is not consumed
         insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'N'  )
 
     else:
+        sys.stderr.write("Using other db\n")
         ###
         # If the SP wants us to put it into their database, enter it in
         # our database in the SP database.
