@@ -97,7 +97,6 @@ def run() :
     else :
         print "Content-type: text/plain"
         print ""
-        sys.stderr.write("No data")
         if debug :
             print "SSO did not return the SP field"
             print "CGI ARGS"
