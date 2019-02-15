@@ -20,7 +20,9 @@ import datetime
 import iso8601
 import pytz
 
-with open('urllist.json','r') as servicefile:
+urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
+
+with open(urlfile,'r') as servicefile:
     service_net = json.load(servicefile)
 
 # bug: refuse auth for evid that is too old
