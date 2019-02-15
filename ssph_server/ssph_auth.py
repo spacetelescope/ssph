@@ -83,9 +83,9 @@ def run() :
     # After the authentication, that single parameter comes here as
     # sp=... giving the name of the service provider that is requesting
     # service.
-    sys.stderr.write("REMOTE ADDR: {}".format(os.environ['REMOTE_ADDR']))
-    sys.stderr.write("Shib_Identity_Provider: {}".format(os.environ["Shib_Identity_Provider"]))
-    sys.stderr.write("STScI_UUID: {}".format(os.environ["STScI_UUID"]))
+    sys.stderr.write("REMOTE ADDR: {}\n".format(os.environ['REMOTE_ADDR']))
+    sys.stderr.write("Shib_Identity_Provider: {}\n".format(os.environ["Shib_Identity_Provider"]))
+    sys.stderr.write("STScI_UUID: {}\n".format(os.environ["STScI_UUID"]))
     sys.stderr.flush()
 
     data = cgi.FieldStorage()
@@ -118,6 +118,7 @@ def run() :
     # look up information about the service provider
     c = core_db.execute("SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
+
     if ans is None :
         # hm - we do not know your SP; you lose.
         print "Content-type: text/plain"
@@ -133,6 +134,11 @@ def run() :
         return 0
 
     return_url, dbtype, dbcreds = ans
+
+    sys.stderr.write("Return URL: {}\n".format(return_url))
+    sys.stderr.write("DBtype: {}\n".format(dbtype))
+    sys.stderr.write("DBcreds: {}\n".format(dbcreds))
+    sys.stderr.flush()
 
     ###
     # auth_event_id is a crypto-strong random identifier for this
