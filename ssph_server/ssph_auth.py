@@ -89,6 +89,9 @@ def run() :
     sys.stderr.flush()
 
     data = cgi.FieldStorage()
+    sys.stderr.write("Datacheck:\n")
+    sys.stderr.write(data)
+    sys.stderr.flush()
     if "sp" in data :
         sp = data["sp"].value.strip()
     else :
@@ -105,8 +108,7 @@ def run() :
                 print "%s=%s"%(x,os.environ[x])
         return 0
 
-    sys.stderr.write(data)
-    sys.stderr.flush()
+
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
