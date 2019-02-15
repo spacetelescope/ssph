@@ -199,6 +199,8 @@ def run() :
     # We store all the user attribs in a json block
     attribs = json.dumps( attribs )
 
+    sys.stderr.write("Attribs: {}\n".format(attribs))
+    sys.stderr.flush()
     ###
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
@@ -213,6 +215,8 @@ def run() :
         ###
         # log the authentication event in our table. it is not consumed
         insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'N'  )
+        sys.stderr.write("Insert succeeded\n")
+        sys.stderr.flush()
 
     else:
         sys.stderr.write("Using other db\n")
