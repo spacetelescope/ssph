@@ -108,7 +108,8 @@ def run() :
                 print "%s=%s"%(x,os.environ[x])
         return 0
 
-
+    sys.stderr.write("Passed Data\n")
+    sys.stderr.write(data)
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
