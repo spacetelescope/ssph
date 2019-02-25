@@ -27,7 +27,7 @@ except IOError :
 #####
 # database: sqlite
 # MOVE THE DATABASE LOCATION BEFORE ACTUAL USE
-if 0 :
+if 0:
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
@@ -37,7 +37,7 @@ if 0 :
 #####
 # database: postgres
 
-if 0 :
+if 0:
     import pandokia.db_psycopg2 as d
     core_db = d.PandokiaDB( {
         'host'      : 'banana.stsci.edu',
@@ -51,10 +51,10 @@ if 0 :
 #####
 # database: mysql
 
-if 1 :
+if 1:
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
-            'host'      : 'plssphdbv1',
+            'host'      : 'plssphdb2',
             'port'      : 3306,
             'user'      : 'etcadmin',
             'passwd'    : password,
@@ -63,11 +63,10 @@ if 1 :
             }
         )
 
-
 #####
 # database: microsoft sql server
 
-if 0 :
+if 0:
     # set environ before the import -- oops, too late!
     # os.environ['TDSVER'] = '8.0'
     import pandokia.db_pymssql as d

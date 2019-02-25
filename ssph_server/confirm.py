@@ -90,11 +90,6 @@ def run() :
     signature = data["sig"].value
         # the hash computed by the client of the input for this request
 
-    sys.stderr.write("sp: {}\n".format(sp))
-    sys.stderr.write("evid: {}\n".format(evid))
-    sys.stderr.write("sig: {}\n".format(signature))
-    sys.stderr.flush()
-
     ### write your own if statements here
     match = False
     # service_net is now a dictionary, but we only want the values
@@ -104,9 +99,6 @@ def run() :
     if not match:
         _barf(data,'ip-mismatch')
         sys.exit(1)
-
-    sys.stderr.write("No barf on match to {}\n".format(url))
-    sys.stderr.flush()
 
     ###
     # look up information about the service provider
@@ -118,9 +110,6 @@ def run() :
         # (Also, unknown SP should not make requests.)
         _barf(data, "sp-unk")
         return 1
-
-    sys.stderr.write("No barf on db\n")
-    sys.stderr.flush()
 
     dbtype, secret, hash = ans
 
@@ -135,9 +124,6 @@ def run() :
         # if this
         _barf(data, "mode")
         return 1
-
-    sys.stderr.write("No barf on ssph check\n")
-    sys.stderr.flush()
 
     ###
     # The demo use the secret 12345678.  A production SSPH
@@ -158,9 +144,6 @@ def run() :
     except AttributeError :
         # python 2.6
         hash_ok = hash in ( "md5", "sha1", "sha224", "sha256", "sha384", "sha512" )
-
-    sys.stderr.write("hash {}\n".format(hash))
-    sys.stderr.flush()
 
     if not hash_ok :
         # Notice that the choice of hash algorithms is in the SSPH
@@ -210,7 +193,7 @@ def run() :
     ###
     # if it took the SP more than 5 minutes to check up on this user, I
     # think something funky is going on.
-    timeobj = datetime.timedelta(datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme))
+    timeobj = datetime.timedelta(datetime.datetime.now(pytz.utc).second - iso8601.parse_date(tyme).second)
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
