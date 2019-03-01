@@ -192,8 +192,12 @@ def run() :
     attribs = { }
     shib_vars = re.compile("^(STScI_|Shib_|[a-z_])[A-Za-z0-9_-]*")
     for x in os.environ:
+        sys.stderr.write("Var {}: {}".format(x, os.environ[x]))
         if shib_vars.match(x):
             attribs[x] = os.environ[x]
+	    sys.stderr.write(" MATCH")
+        sys.stderr.write('\n')
+        sys.stderr.flush()
 
     ###
     # We store all the user attribs in a json block
