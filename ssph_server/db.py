@@ -57,7 +57,7 @@ if 1:
             'host'      : 'plssphdb2',
             'port'      : 3306,
             'user'      : 'etcadmin',
-            'passwd'    : password,
+            'passwd'    : password, # stored in /internal/data1/other/config/pswd
             'db'        : 'ssph',
             'use_unicode' : False,
             }
