@@ -83,15 +83,9 @@ def run() :
     # After the authentication, that single parameter comes here as
     # sp=... giving the name of the service provider that is requesting
     # service.
-    sys.stderr.write("REMOTE ADDR: {}\n".format(os.environ['REMOTE_ADDR']))
-    sys.stderr.write("Shib_Identity_Provider: {}\n".format(os.environ["Shib_Identity_Provider"]))
-    sys.stderr.write("STScI_UUID: {}\n".format(os.environ["STScI_UUID"]))
-    sys.stderr.flush()
 
     data = cgi.FieldStorage()
-    sys.stderr.write("Datacheck:\n")
-    sys.stderr.write(data['sp'].value.strip())
-    sys.stderr.flush()
+
     if "sp" in data :
         sp = data["sp"].value.strip()
     else :
@@ -107,8 +101,6 @@ def run() :
                 print "%s=%s"%(x,os.environ[x])
         return 0
 
-    sys.stderr.write("Passed Data\n")
-    sys.stderr.flush()
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
@@ -136,11 +128,6 @@ def run() :
         return 0
 
     return_url, dbtype, dbcreds = ans
-
-    sys.stderr.write("Return URL: {}\n".format(return_url))
-    sys.stderr.write("DBtype: {}\n".format(dbtype))
-    sys.stderr.write("DBcreds: {}\n".format(dbcreds))
-    sys.stderr.flush()
 
     ###
     # auth_event_id is a crypto-strong random identifier for this
@@ -192,19 +179,13 @@ def run() :
     attribs = { }
     shib_vars = re.compile("^(STScI_|Shib_|[a-z_])[A-Za-z0-9_-]*")
     for x in os.environ:
-        sys.stderr.write("Var {}: {}".format(x, os.environ[x]))
         if shib_vars.match(x):
             attribs[x] = os.environ[x]
-	    sys.stderr.write(" MATCH")
-        sys.stderr.write('\n')
-        sys.stderr.flush()
 
     ###
     # We store all the user attribs in a json block
     attribs = json.dumps( attribs )
 
-    sys.stderr.write("Attribs: {}\n".format(attribs))
-    sys.stderr.flush()
     ###
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
@@ -213,17 +194,12 @@ def run() :
 
 
     if dbtype == "ssph" :
-        sys.stderr.write("Using SSPH db\n")
-        sys.stderr.flush()
 
         ###
         # log the authentication event in our table. it is not consumed
         insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'N'  )
-        sys.stderr.write("Insert succeeded\n")
-        sys.stderr.flush()
 
     else:
-        sys.stderr.write("Using other db\n")
         ###
         # If the SP wants us to put it into their database, enter it in
         # our database in the SP database.
