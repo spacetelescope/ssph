@@ -17,7 +17,7 @@ import os.path
 # The database password is stored in a separate file that belongs
 # to the apache user.  Here is the name of the file.
 
-password_file = '/usr/lib/python2.6/site-packages/ssph_server/pswd'
+password_file = '/internal/data1/other/config/pswd'
 
 try :
     password = open( password_file, "r").readline().strip()
@@ -27,7 +27,7 @@ except IOError :
 #####
 # database: sqlite
 # MOVE THE DATABASE LOCATION BEFORE ACTUAL USE
-if 0 :
+if 0:
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
@@ -37,7 +37,7 @@ if 0 :
 #####
 # database: postgres
 
-if 0 :
+if 0:
     import pandokia.db_psycopg2 as d
     core_db = d.PandokiaDB( {
         'host'      : 'banana.stsci.edu',
@@ -51,23 +51,22 @@ if 0 :
 #####
 # database: mysql
 
-if 1 :
+if 1:
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
-            'host'      : 'tlssphdbv1', # plssphv1 for production
+            'host'      : 'plssphdb2',
             'port'      : 3306,
             'user'      : 'etcadmin',
-            'passwd'    : password, # stored in /usr/lib/python2.6/site-packages/ssph_server/pswd
+            'passwd'    : password, # stored in /internal/data1/other/config/pswd
             'db'        : 'ssph',
             'use_unicode' : False,
             }
         )
 
-
 #####
 # database: microsoft sql server
 
-if 0 :
+if 0:
     # set environ before the import -- oops, too late!
     # os.environ['TDSVER'] = '8.0'
     import pandokia.db_pymssql as d

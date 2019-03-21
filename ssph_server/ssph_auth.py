@@ -85,6 +85,7 @@ def run() :
     # service.
 
     data = cgi.FieldStorage()
+
     if "sp" in data :
         sp = data["sp"].value.strip()
     else :
@@ -111,6 +112,7 @@ def run() :
     # look up information about the service provider
     c = core_db.execute("SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
+
     if ans is None :
         # hm - we do not know your SP; you lose.
         print "Content-type: text/plain"
@@ -192,6 +194,7 @@ def run() :
 
 
     if dbtype == "ssph" :
+
         ###
         # log the authentication event in our table. it is not consumed
         insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'N'  )

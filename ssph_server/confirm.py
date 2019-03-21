@@ -1,5 +1,5 @@
 """
-This module implements $DOCUMENTROOT/unsecured/ssph_confirm.cgi; 
+This module implements $DOCUMENTROOT/unsecured/ssph_confirm.cgi;
 
 Service Providers ask this CGI to confirm that a user is authenticated,
 and to fetch the information returned by the authentication.  Since
@@ -20,7 +20,10 @@ import datetime
 import iso8601
 import pytz
 
-service_net = ["130.167.209.0/17", "52.45.9.215/32", "34.192.0.72/32", "34.195.114.74/32", "34.195.10.111/32", "34.194.193.153/32", "52.4.225.70/32", "52.207.161.178/32", "34.201.96.92/32"]
+urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
+
+with open(urlfile,'r') as servicefile:
+    service_net = json.load(servicefile)
 
 # bug: refuse auth for evid that is too old
 # bug: refuse auth for evid that was used before
@@ -28,12 +31,6 @@ service_net = ["130.167.209.0/17", "52.45.9.215/32", "34.192.0.72/32", "34.195.1
 from ssph_server.db import core_db
 
 debug = True
-
-#####
-#
-# timdelta.total_seconds() not in python 2.6
-def total_seconds( td ) :
-    return td.seconds + td.days * (24 * 3600) + (td.microseconds / 1e6)
 
 #####
 #
@@ -58,8 +55,8 @@ def _barf(data, message) :
 
     # log to the apache error log
     sys.stderr.write(
-        "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n" 
-        % (datetime.datetime.now().isoformat(' '), remote, server, message) 
+        "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
+        % (datetime.datetime.now().isoformat(' '), remote, server, message)
         )
     sys.stderr.flush()
 
@@ -78,7 +75,7 @@ def run() :
 
     # checking that the client is in the network range that we expect
     # to serve
-    remote_addr = os.environ["REMOTE_ADDR"] 
+    remote_addr = os.environ["REMOTE_ADDR"]
 
     ###
 
@@ -95,13 +92,14 @@ def run() :
 
     ### write your own if statements here
     match = False
-    for i in service_net:
-        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(i) :
+    # service_net is now a dictionary, but we only want the values
+    for url in service_net.values():
+        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)) :
 	    match = True
     if not match:
         _barf(data,'ip-mismatch')
         sys.exit(1)
-    
+
     ###
     # look up information about the service provider
 
@@ -195,7 +193,8 @@ def run() :
     ###
     # if it took the SP more than 5 minutes to check up on this user, I
     # think something funky is going on.
-    if total_seconds( datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme) ) > 300 :
+    timeobj = datetime.timedelta(datetime.datetime.now(pytz.utc).second - iso8601.parse_date(tyme).second)
+    if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
             ( evid, sp )
@@ -230,4 +229,3 @@ def run() :
     print signature
     print attribs
     return 0
-
