@@ -54,7 +54,7 @@ if 0:
 if 1:
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
-            'host'      : 'plssphdb2',
+            'host'      : 'plssphdbv1',
             'port'      : 3306,
             'user'      : 'etcadmin',
             'passwd'    : password, # stored in /internal/data1/other/config/pswd
