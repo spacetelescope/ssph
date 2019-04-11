@@ -194,8 +194,8 @@ def run() :
     # if it took the SP more than 5 minutes to check up on this user, I
     # think something funky is going on.
     timeobj = datetime.timedelta(datetime.datetime.now(pytz.utc).second - iso8601.parse_date(tyme).second)
-    sys.stderr.write("Time_in: {}".format(iso8601.parse_date(tyme).second))
-    sys.stderr.write("Time_out: {}".format(datetime.timedelta(datetime.datetime.now(pytz.utc).second)))
+    sys.stderr.write(iso8601.parse_date(tyme).second)
+    sys.stderr.write(datetime.timedelta(datetime.datetime.now(pytz.utc).second))
     sys.stderr.write(timeobj.total_seconds())
     sys.stderr.flush()
     if timeobj.total_seconds() > 300:
