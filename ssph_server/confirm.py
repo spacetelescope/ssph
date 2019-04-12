@@ -207,7 +207,7 @@ def run() :
             )
         core_db.commit()
         logging.debug("expired: {}".format(timeobj.total_seconds()))
-        _barf(data, "expired {}".format(timeobj.total_seconds()))
+        _barf(data, "expired" )
         return 1
 
     ###
