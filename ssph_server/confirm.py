@@ -10,6 +10,7 @@ For extra bonus security, we could keep an IP list of servers that
 host each SP, but I don't think it is worth the extra work.
 
 """
+import logging
 import cgi
 import hashlib
 import json
@@ -29,6 +30,7 @@ with open(urlfile,'r') as servicefile:
 # bug: refuse auth for evid that was used before
 
 from ssph_server.db import core_db
+logging.basicConfig(filename='ssph.log', level=logging.DEBUG)
 
 debug = True
 
@@ -97,6 +99,8 @@ def run() :
         if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)) :
 	    match = True
     if not match:
+        logging.debug('Address: {}'.format(ipaddr.IPv4Address(remote_addr)))
+        logging.debug(ipaddr.IPNetwork(str(url)))
         _barf(data,'ip-mismatch')
         sys.exit(1)
 
@@ -149,6 +153,7 @@ def run() :
         # Notice that the choice of hash algorithms is in the SSPH
         # database, so in principle you will never encounter this
         # case, but mistakes happen.
+        logging.debug("hash: {}".format(hash))
         _barf(data, "hash")
         return 1
 
@@ -169,6 +174,7 @@ def run() :
 
     if signature != m.hexdigest() :
         # the client does not know its own secret
+        logging.debug("hash-match: {}, {}".format(signature, m.hexdigest()))
         _barf(data, "hash-match")
         return 1
 
@@ -200,6 +206,7 @@ def run() :
             ( evid, sp )
             )
         core_db.commit()
+        logging.debug("expired: {}".format(timeobj.total_seconds()))
         _barf(data, "expired {}".format(timeobj.total_seconds()))
         return 1
 
