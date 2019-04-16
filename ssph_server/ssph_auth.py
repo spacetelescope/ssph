@@ -192,6 +192,8 @@ def run() :
     # about time zones.
     tyme = datetime.datetime.utcnow().isoformat(' ')
 
+    sys.stderr.write(tyme)
+    sys.stderr.flush()
 
     if dbtype == "ssph" :
 
