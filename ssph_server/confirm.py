@@ -193,14 +193,16 @@ def run() :
     ###
     # if it took the SP more than 5 minutes to check up on this user, I
     # think something funky is going on.
-    timeobj = datetime.timedelta(datetime.datetime.now(pytz.utc).second - iso8601.parse_date(tyme).second)
+    # datetime.datetime - datetime.datetime = datetime.timedelta (which is what
+    # we actually want.)
+    timeobj = datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme)
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
             ( evid, sp )
             )
         core_db.commit()
-        _barf(data, "expired" )
+        _barf(data, "expired ({} - {} = {})".format(datetime.datetime.now(pytz.utc).isoformat(' '), tyme, timeobj))
         return 1
 
     ###
