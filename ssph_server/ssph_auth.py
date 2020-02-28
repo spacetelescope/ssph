@@ -18,7 +18,7 @@ in the URL to find the authentication record in the database.
 If the SP receives a session cookie:
     if the identity declared by SSPH is the same as the identity declared by the session cookie:
         extend the expiration of the session cookie
-    else :
+    else:
         revoke the existing session cookie
         create and issue a session cookie
         return a display saying "you are no longer XXX, you are YYY; click to proceed"
@@ -42,7 +42,7 @@ import re
 
 from ssph_server.db import core_db
 
-if debug :
+if debug:
     import cgitb
     cgitb.enable()
 
@@ -51,7 +51,7 @@ if debug :
 # I guess I could include a serial number, but getting the same two
 # 48 bit strings out of /dev/urandom in the same 0.15 second interval?
 # Seems pretty unlikely.
-def create_auth_event_id() :
+def create_auth_event_id():
     import binascii
     # os.urandom gets that many bytes from /dev/urandom
     # Using %010x gets us an extra digit (from multiplying by 7)
@@ -60,16 +60,16 @@ def create_auth_event_id() :
     # hex characters.
     # b.t.w.  The weakest part of this is /dev/urandom on machines that
     # don't have hardware random numbers.
-    return binascii.b2a_hex(os.urandom(48)) + ( "%010x" % (time.time()*7) )
+    return binascii.b2a_hex(os.urandom(48)) + ("%010x" % (time.time()*7))
 
 ###
 # function to insert an authentication event into the database table
-def insert_auth( db, tyme, sp, auth_event_id, attribs, consumed ) :
+def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed):
     db.execute(
         """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, stsci_uuid, attribs, consumed )
         VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
-        ( tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["STScI_UUID"], attribs, consumed )
+        (tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
+            os.environ["Shib_Identity_Provider"], os.environ["STScI_UUID"], attribs, consumed)
         )
     db.commit()
 
@@ -77,7 +77,7 @@ def insert_auth( db, tyme, sp, auth_event_id, attribs, consumed ) :
 #
 # The main program
 #
-def run() :
+def run():
     # To get through all the redirects from the SP, through Shibboleth, and back
     # to here, we use a single parameter in a GET-style CGI request.
     # After the authentication, that single parameter comes here as
@@ -86,19 +86,18 @@ def run() :
 
     data = cgi.FieldStorage()
 
-    if "sp" in data :
+    if "sp" in data:
         sp = data["sp"].value.strip()
-    else :
-        print "Content-type: text/plain"
-        print ""
-        if debug :
-            print "SSO did not return the SP field"
-            print "CGI ARGS"
-            for x in data :
-                print data[x].value
-            print "ENVIRONMENT"
-            for x in sorted( [x for x in os.environ] ):
-                print "%s=%s"%(x,os.environ[x])
+    else:
+        print("Content-type: text/plain\n")
+        if debug:
+            print("SSO did not return the SP field")
+            print("CGI ARGS")
+            for x in data:
+                print(data[x].value)
+            print("ENVIRONMENT")
+            for x in sorted([x for x in os.environ]):
+                print("%s=%s"%(x,os.environ[x]))
         return 0
 
     # sp is now the name of the service provider
@@ -106,22 +105,21 @@ def run() :
     # validate sp; make sure the string only contains alphanumeric characters,
     # dashes, underscores, and periods
     if not re.match("^[A-Za-z0-9_:.-]*$", sp):
-	return 1
+        return 1
 
     ###
     # look up information about the service provider
     c = core_db.execute("SELECT url, dbtype, dbcreds FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
 
-    if ans is None :
+    if ans is None:
         # hm - we do not know your SP; you lose.
-        print "Content-type: text/plain"
-        print ""
-        if debug :
-            print "Do not know your application: ",sp
+        print("Content-type: text/plain\n")
+        if debug:
+            print("Do not know your application: ",sp)
         sys.stderr.write(
             "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
-            % (sp, datetime.datetime.now().isoformat() )
+            % (sp, datetime.datetime.now().isoformat())
             )
         sys.stderr.flush()
 
@@ -176,7 +174,7 @@ def run() :
     # so I'm using the regex below.  Starts with STScI_ or starts
     # with Shib_ or starts with a lower case letter or starts with _ .
     # The rest is a letter, digit, _ or - .
-    attribs = { }
+    attribs = {}
     shib_vars = re.compile("^(STScI_|Shib_|[a-z_])[A-Za-z0-9_-]*")
     for x in os.environ:
         if shib_vars.match(x):
@@ -184,7 +182,7 @@ def run() :
 
     ###
     # We store all the user attribs in a json block
-    attribs = json.dumps( attribs )
+    attribs = json.dumps(attribs)
 
     ###
     # We store the time of the authentication event in ISO format,
@@ -195,11 +193,11 @@ def run() :
     sys.stderr.write(tyme)
     sys.stderr.flush()
 
-    if dbtype == "ssph" :
+    if dbtype == "ssph":
 
         ###
         # log the authentication event in our table. it is not consumed
-        insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'N'  )
+        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'N')
 
     else:
         ###
@@ -208,22 +206,21 @@ def run() :
 
         # consumed=D to indicate that the CGI authenticator should never
         # see a request to validate this authentication event.
-        insert_auth( core_db,  tyme, sp, auth_event_id, attribs, 'D'  )
+        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'D')
 
         # if using the SP's database, we have to connect to it.
         # (exec is ok because we got dbtype from our trusted configuration data)
-        exec "import pandokia.db_%s as client_dbm" % dbtype
+        exec("import pandokia.db_%s as client_dbm" % dbtype)
         dbcreds = json.loads(dbcreds)
         cdb = client_dbm.PandokiaDB( dbcreds )
 
-        insert_auth( cdb,  tyme, sp, auth_event_id, attribs  )
+        insert_auth(cdb, tyme, sp, auth_event_id, attribs)
 
 
     ###
     # Redirect the user back to the SP.
 
-    print "Status: 303 See Other"
-    print "Location:",return_url
-    print ""
+    print("Status: 303 See Other\nLocation:",return_url)
+    print()
 
     return 0

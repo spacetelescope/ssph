@@ -38,16 +38,14 @@ debug = True
 # odd enough to be worth logging/alerting for.
 #
 
-def _barf(data, message) :
+def _barf(data, message):
     # if there is a reason to barf, we will just tell the client "barf"
-    print "Content-type: text/plain"
-    print ""
-    print "barf"
+    print("Content-type: text/plain\n\nbarf")
 
     # in debug mode, we will give a little more information.  This is
     # mainly for testing SSPH, not for clients.
-    if debug :
-        print message
+    if debug:
+        print(message)
 
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
     remote = os.environ["REMOTE_ADDR"]
@@ -71,7 +69,7 @@ def _barf(data, message) :
 #
 #
 
-def run() :
+def run():
 
     # checking that the client is in the network range that we expect
     # to serve
@@ -94,8 +92,8 @@ def run() :
     match = False
     # service_net is now a dictionary, but we only want the values
     for url in service_net.values():
-        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)) :
-	    match = True
+        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)):
+            match = True
     if not match:
         _barf(data,'ip-mismatch')
         sys.exit(1)
@@ -105,7 +103,7 @@ def run() :
 
     c = core_db.execute("SELECT dbtype, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
-    if ans is None :
+    if ans is None:
         # The service provider is not known to us.  We cannot proceed.
         # (Also, unknown SP should not make requests.)
         _barf(data, "sp-unk")
@@ -120,7 +118,7 @@ def run() :
     # expected to use the CGI, then we do not need to allow this as a
     # potential attack vector.
 
-    if dbtype != "ssph" :
+    if dbtype != "ssph":
         # if this
         _barf(data, "mode")
         return 1
@@ -130,10 +128,10 @@ def run() :
     # should not permit the demo value in the example.  It's too
     # much like setting your password to "password"
 
-    if not debug :
-        if secret == "12345678" :
-            print "content-type: text/plain\n\nbarf\n"
-            print "---\n\nreally? you used the demo secret in non-debug mode???\n\n---"
+    if not debug:
+        if secret == "12345678":
+            print("content-type: text/plain\n\nbarf\n")
+            print("---\n\nreally? you used the demo secret in non-debug mode???\n\n---")
         return 1
 
     ###
@@ -141,11 +139,11 @@ def run() :
     # algorithms.  Use the coolest one that the client supports.
     try :
         hash_ok = hash in hashlib.algorithms
-    except AttributeError :
+    except AttributeError:
         # python 2.6
-        hash_ok = hash in ( "md5", "sha1", "sha224", "sha256", "sha384", "sha512" )
+        hash_ok = hash in ("md5", "sha1", "sha224", "sha256", "sha384", "sha512")
 
-    if not hash_ok :
+    if not hash_ok:
         # Notice that the choice of hash algorithms is in the SSPH
         # database, so in principle you will never encounter this
         # case, but mistakes happen.
@@ -157,7 +155,7 @@ def run() :
 
     # exec is ok because we know that hash is one of the strings from
     # hashlib.algorithms
-    exec "m = hashlib.%s()" % hash
+    exec("m = hashlib.%s()" % hash)
     m.update( sp )
     m.update(" ")
     m.update( evid )
@@ -167,7 +165,7 @@ def run() :
     ###
     # compare the submitted signature of the request to the computed signature
 
-    if signature != m.hexdigest() :
+    if signature != m.hexdigest():
         # the client does not know its own secret
         _barf(data, "hash-match")
         return 1
@@ -179,10 +177,10 @@ def run() :
     # imply either a buggy SP or an attack.
     c = core_db.execute("""SELECT tyme, attribs FROM ssph_auth_events
             WHERE auth_event_id = :1 AND sp = :2 AND consumed = 'N' """,
-            ( evid, sp )
+            (evid, sp)
         )
     ans = c.fetchone()
-    if ans is None :
+    if ans is None:
         _barf(data, "cookie-missing")
         return 1
 
@@ -216,7 +214,7 @@ def run() :
     ###
     # sign the returned info with the same shared secret so the client
     # knows it really came from us.
-    exec "m = hashlib.%s()" % hash
+    exec("m = hashlib.%s()" % hash)
     m.update(attribs)
     m.update(' ')
     m.update(secret)
@@ -226,8 +224,5 @@ def run() :
     # send back 1 line of signature, then arbitrarily long information.
     # (in practice, it is usually a single line of json, but it might
     # be multi-line if somebody pretty printed it into the database.)
-    print "content-type: text/plain"
-    print ""
-    print signature
-    print attribs
+    print("content-type: text/plain\n\n{}\n{}".format(signature, attribs))
     return 0
