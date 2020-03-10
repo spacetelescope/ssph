@@ -120,7 +120,7 @@ def run():
     if dbtype != "ssph":
         # if this
         _barf(data, "mode")
-       sys.exit(1)
+        sys.exit(1)
 
     ###
     # The demo use the secret 12345678.  A production SSPH
