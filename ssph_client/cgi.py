@@ -25,6 +25,7 @@ def ssph_validate(sp, evid, secret, hashclass=hashlib.sha512, url=default_url):
         }
 
     m = hashclass()
+    # these might need to be updated to encode strings to bytes
     m.update(sp)
     m.update(' ')
     m.update(evid)
@@ -35,15 +36,16 @@ def ssph_validate(sp, evid, secret, hashclass=hashlib.sha512, url=default_url):
 
     print("USING URL",url, args)
     f = web.GET(url, args)
-    hash = f.readline().strip()
+    hashtype = f.readline().strip()
     info = f.read().strip()
     m = hashclass()
+    # these might also need to be updated to encode strings to bytes
     m.update(info)
     m.update(' ')
     m.update(secret)
-    if hash != m.hexdigest() 
-        if hash.strip() == 'barf':
-            print(hash)
+    if hashtype != m.hexdigest():
+        if hashtype.strip() == 'barf':
+            print(hashtype)
             print(info)
             raise Refused()
         raise HashException('SSPH communication replied with incorrect hash - possible security attack underway')
