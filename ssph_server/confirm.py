@@ -162,11 +162,11 @@ def run():
     else:
         m = hashlib.new(hashtype)
     #exec("m = hashlib.%s()" % hash)
-    m.update(bytes(sp))
+    m.update(sp.encode('utf-8'))
     m.update(" ")
-    m.update(bytes(evid))
+    m.update(evid.encode('utf-8'))
     m.update(" ")
-    m.update(bytes(secret))
+    m.update(secret.encode('utf-8'))
 
     ###
     # compare the submitted signature of the request to the computed signature
