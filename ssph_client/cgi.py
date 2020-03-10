@@ -66,17 +66,17 @@ if __name__ == '__main__':
     # set this to a cookie that does not have an auth in the db
     cookie2 = '1231242141224'
 
-    if True:
+    if False:
         # works, replies with a valid response
         print(ssph_validate(sp, cookie1, hashclass = hashclass, secret=secret))
         print()
 
-    if False:
+    if True:
         # cookie not know, barfs
         print(ssph_validate(sp=sp, cookie=cookie2, hashclass=hashclass, secret=secret))
         print()
 
-    if False:
+    if True:
         # signed with wrong secret, barfs
         print(ssph_validate(sp=sp, cookie=cookie1, hashclass=hashclass, secret=secret+"xx"))
         print()

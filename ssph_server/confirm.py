@@ -161,7 +161,6 @@ def run():
         m = hashlib.sha512()
     else:
         m = hashlib.new(hashtype)
-    #exec("m = hashlib.%s()" % hash)
     m.update(sp.encode('utf-8'))
     m.update(" ".encode('utf-8'))
     m.update(evid.encode('utf-8'))
@@ -199,6 +198,7 @@ def run():
     # think something funky is going on.
     # datetime.datetime - datetime.datetime = datetime.timedelta (which is what
     # we actually want.)
+    # The "Z" adds time zone information (UTC) to the tyme datetime object
     timeobj = datetime.now(tz.UTC) - parser.isoparse(tyme + "Z")
     if timeobj.total_seconds() > 300:
         core_db.execute(
@@ -225,7 +225,6 @@ def run():
         m = hashlib.sha512()
     else:
         m = hashlib.new(hashtype)
-    #exec("m = hashlib.%s()" % hashtype)
     m.update(attribs.encode('utf-8'))
     m.update(' '.encode('utf-8'))
     m.update(secret.encode('utf-8'))
