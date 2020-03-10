@@ -16,7 +16,7 @@ import json
 import os
 import sys
 import ipaddress
-import datetime
+from datetime import datetime
 from dateutil import parser, tz
 
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
@@ -53,7 +53,7 @@ def _barf(data, message):
     # log to the apache error log
     sys.stderr.write(
         "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
-        % (datetime.datetime.now().isoformat(' '), remote, server, message)
+        % (datetime.now().isoformat(' '), remote, server, message)
         )
     sys.stderr.flush()
 
@@ -106,7 +106,7 @@ def run():
         # The service provider is not known to us.  We cannot proceed.
         # (Also, unknown SP should not make requests.)
         _barf(data, "sp-unk")
-        return 1
+        sys.exit(1)
 
     dbtype, secret, hash = ans
 
@@ -120,7 +120,7 @@ def run():
     if dbtype != "ssph":
         # if this
         _barf(data, "mode")
-        return 1
+       sys.exit(1)
 
     ###
     # The demo use the secret 12345678.  A production SSPH
@@ -131,35 +131,42 @@ def run():
         if secret == "12345678":
             print("content-type: text/plain\n\nbarf\n")
             print("---\n\nreally? you used the demo secret in non-debug mode???\n\n---")
-        return 1
+        sys.exit(1)
 
     ###
     # The different clients can be configured for different hash
     # algorithms.  Use the coolest one that the client supports.
-    try :
-        hash_ok = hash in hashlib.algorithms
+    try:
+        hash_ok = hashtype in hashlib.algorithms
     except AttributeError:
         # python 2.6
-        hash_ok = hash in ("md5", "sha1", "sha224", "sha256", "sha384", "sha512")
+        hash_ok = hashtype in ("md5", "sha1", "sha224", "sha256", "sha384", "sha512")
 
     if not hash_ok:
         # Notice that the choice of hash algorithms is in the SSPH
         # database, so in principle you will never encounter this
         # case, but mistakes happen.
         _barf(data, "hash")
-        return 1
+        sys.exit(1)
 
     ###
     # compute the signature of the request
 
     # exec is ok because we know that hash is one of the strings from
     # hashlib.algorithms
-    exec("m = hashlib.%s()" % hash)
-    m.update( sp )
+    # exec functionality changed in Python 3, so now we'll use the hashlib functionality
+    # The documentation warns that hashlib.new() is slow, so let's check for our most common
+    # case before committing to the slow method
+    if hashtype == "sha512":
+        m = hashlib.sha512()
+    else:
+        m = hashlib.new(hashtype)
+    #exec("m = hashlib.%s()" % hash)
+    m.update(sp)
     m.update(" ")
-    m.update( evid )
+    m.update(evid)
     m.update(" ")
-    m.update( secret )
+    m.update(secret)
 
     ###
     # compare the submitted signature of the request to the computed signature
@@ -167,7 +174,7 @@ def run():
     if signature != m.hexdigest():
         # the client does not know its own secret
         _barf(data, "hash-match")
-        return 1
+        sys.exit(1)
 
     ###
     # Look up the authentication cookie in the table of recent
@@ -181,7 +188,7 @@ def run():
     ans = c.fetchone()
     if ans is None:
         _barf(data, "cookie-missing")
-        return 1
+        sys.exit(1)
 
     # Finally, we have the information we are searching for.  This is
     # the data that was stored when the user was initially authenticated.
@@ -196,17 +203,17 @@ def run():
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
-            ( evid, sp )
+            (evid, sp)
             )
         core_db.commit()
         _barf(data, "expired ({} - {} = {})".format(datetime.now(tz.tzutc).isoformat(' '), tyme, timeobj))
-        return 1
+        sys.exit(1)
 
     ###
     # we have used this authentication record.  It may not be used again.
     core_db.execute(
         "UPDATE ssph_auth_events SET consumed = 'Y' WHERE auth_event_id = :1 AND sp = :2",
-        (  evid, sp )
+        (evid, sp)
         )
     core_db.commit()
 
@@ -224,4 +231,4 @@ def run():
     # (in practice, it is usually a single line of json, but it might
     # be multi-line if somebody pretty printed it into the database.)
     print("content-type: text/plain\n\n{}\n{}".format(signature, attribs))
-    return 0
+    sys.exit()
