@@ -220,10 +220,15 @@ def run():
     ###
     # sign the returned info with the same shared secret so the client
     # knows it really came from us.
-    exec("m = hashlib.%s()" % hashtype)
-    m.update(attribs)
-    m.update(' ')
-    m.update(secret)
+    # See above for explanation of hashing
+    if hashtype == "sha512":
+        m = hashlib.sha512()
+    else:
+        m = hashlib.new(hashtype)
+    #exec("m = hashlib.%s()" % hashtype)
+    m.update(attribs.encode('utf-8'))
+    m.update(' '.encode('utf-8'))
+    m.update(secret.encode('utf-8'))
     signature = m.hexdigest()
 
     ###
