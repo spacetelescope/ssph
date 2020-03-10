@@ -108,7 +108,7 @@ def run():
         _barf(data, "sp-unk")
         sys.exit(1)
 
-    dbtype, secret, hash = ans
+    dbtype, secret, hashtype = ans
 
     ###
     # This service provider is expected to use CGI confirmations?
@@ -220,7 +220,7 @@ def run():
     ###
     # sign the returned info with the same shared secret so the client
     # knows it really came from us.
-    exec("m = hashlib.%s()" % hash)
+    exec("m = hashlib.%s()" % hashtype)
     m.update(attribs)
     m.update(' ')
     m.update(secret)
