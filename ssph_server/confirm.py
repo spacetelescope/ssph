@@ -199,14 +199,14 @@ def run():
     # think something funky is going on.
     # datetime.datetime - datetime.datetime = datetime.timedelta (which is what
     # we actually want.)
-    timeobj = datetime.now(tz.tzutc) - parser.parse(tyme)
+    timeobj = datetime.now(tz.UTC) - parser.parse(tyme)
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
             (evid, sp)
             )
         core_db.commit()
-        _barf(data, "expired ({} - {} = {})".format(datetime.now(tz.tzutc).isoformat(' '), tyme, timeobj))
+        _barf(data, "expired ({} - {} = {})".format(datetime.now(tz.UTC).isoformat(' '), tyme, timeobj))
         sys.exit(1)
 
     ###
