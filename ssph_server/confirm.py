@@ -199,7 +199,7 @@ def run():
     # think something funky is going on.
     # datetime.datetime - datetime.datetime = datetime.timedelta (which is what
     # we actually want.)
-    timeobj = datetime.now(tz.UTC) - parser.parse(tyme, tzinfo=tz.UTC)
+    timeobj = datetime.now(tz.UTC) - parser.isoparse(tyme, tzinfos=tz.UTC)
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
