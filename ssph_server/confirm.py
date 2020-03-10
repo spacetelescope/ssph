@@ -163,9 +163,9 @@ def run():
         m = hashlib.new(hashtype)
     #exec("m = hashlib.%s()" % hash)
     m.update(sp.encode('utf-8'))
-    m.update(" ")
+    m.update(" ".encode('utf-8'))
     m.update(evid.encode('utf-8'))
-    m.update(" ")
+    m.update(" ".encode('utf-8'))
     m.update(secret.encode('utf-8'))
 
     ###
