@@ -91,7 +91,7 @@ def run():
     match = False
     # service_net is now a dictionary, but we only want the values
     for url in service_net.values():
-        if ipaddress.ip_address(remote_addr) in ipaddress.ip_network(str(url)):
+        if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
             match = True
     if not match:
         _barf(data,'ip-mismatch')
