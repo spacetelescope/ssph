@@ -60,7 +60,8 @@ def create_auth_event_id():
     # hex characters.
     # b.t.w.  The weakest part of this is /dev/urandom on machines that
     # don't have hardware random numbers.
-    return binascii.b2a_hex(os.urandom(48)) + ("%010x" % (time.time()*7))
+    # BUG: the x format statement can only translate integers on Python 3
+    return str(binascii.b2a_hex(os.urandom(48))) + ("{:010x}".format(int(time.time()*7)))
 
 ###
 # function to insert an authentication event into the database table

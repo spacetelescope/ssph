@@ -29,7 +29,7 @@ import pandokia.text_table
 # text_table and then display it as html.
 from ssph_server.db import core_db
 
-cgitb.enable()
+cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 
 from ssph_server.admin_text import html_page
 
@@ -45,7 +45,7 @@ def run():
     # to enable tracebacks.  It is easier than providing proper error
     # messages.
     import cgitb
-    cgitb.enable()
+    cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 
     # get the cgi parameters
     data = cgi.FieldStorage()

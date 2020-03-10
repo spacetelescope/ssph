@@ -32,7 +32,7 @@ if True:
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
     # of concurrent transactions.
-    core_db = d.PandokiaDB("/tmp/test_ssph.db")
+    core_db = d.PandokiaDB("/internal/data1/other/logs/test_db.db")
 
 #####
 # database: postgres
