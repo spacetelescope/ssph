@@ -20,7 +20,7 @@ permitted_users = (
 # no edit beyond here
 #######
 
-
+import sys
 import cgi
 import os
 import cgitb
@@ -39,7 +39,7 @@ def run():
         print("status: 500\ncontent-type: text/plain\n")
         print("\nlogged in but not permitted to admin\n")
         print("you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'])
-        return 1
+        sys.exit(1)
 
     # we never get here unless we are authorized IT people, so it is ok
     # to enable tracebacks.  It is easier than providing proper error
@@ -57,14 +57,14 @@ def run():
         f.write(data['db_pass'].value)
         f.close()
         print("content-type: text/plain\n\ndone")
-        return 0
+        sys.exit()
 
     if 'get_db_pass' in data:
         from ssph_server.db import password_file
         f=open(password_file,"r")
         print("content-type: text/plain\n\n{}".format(f.read()))
         f.close()
-        return 0
+        sys.exit()
 
 
     if 'sp' in data:
@@ -95,7 +95,7 @@ def run():
 
         core_db.commit()
         print("content-type: text/plain\n\ndone")
-        return 0
+        sys.exit()
 
     if 'delete_sp' in data:
         from ssph_server.db import core_db
@@ -104,22 +104,22 @@ def run():
             )
         core_db.commit()
         print("content-type: text/plain\n\ndone")
-        return 0
+        sys.exit()
 
     if 'listsp' in data:
         t = listtb('ssph_sp_info', order_by='ORDER BY sp')
         print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
-        return 0
+        sys.exit()
 
     if 'listau' in data:
         t = listtb('ssph_auth_events', 'ORDER BY tyme')
         print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
-        return 0
+        sys.exit()
 
     # None of the CGI parameters were present, so this is not a form
     # submission.  Show the user the form.
     print("content-type: text/html\n\n{}".format(html_page))
-    return 0
+    sys.exit()
 
 def listtb(table, order_by=''):
     c = core_db.execute("select * from %s %s" % (table, order_by))

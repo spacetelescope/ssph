@@ -99,14 +99,14 @@ def run():
             print("ENVIRONMENT")
             for x in sorted([x for x in os.environ]):
                 print("%s=%s"%(x,os.environ[x]))
-        return 0
+        sys.exit()
 
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
     # dashes, underscores, and periods
     if not re.match("^[A-Za-z0-9_:.-]*$", sp):
-        return 1
+        sys.exit(1)
 
     ###
     # look up information about the service provider
@@ -124,7 +124,7 @@ def run():
             )
         sys.stderr.flush()
 
-        return 0
+        sys.exit()
 
     return_url, dbtype, dbcreds = ans
 
@@ -221,7 +221,6 @@ def run():
     ###
     # Redirect the user back to the SP.
 
-    print("Status: 303 See Other\nLocation:",return_url)
-    print()
+    print("Status: 303 See Other\nLocation: {}\n".format(return_url))
 
-    return 0
+    sys.exit()

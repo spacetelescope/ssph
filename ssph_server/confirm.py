@@ -15,10 +15,9 @@ import hashlib
 import json
 import os
 import sys
-import ipaddr
+import ipaddress
 import datetime
-import iso8601
-import pytz
+from dateutil import parser, tz
 
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
 
@@ -92,7 +91,7 @@ def run():
     match = False
     # service_net is now a dictionary, but we only want the values
     for url in service_net.values():
-        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)):
+        if ipaddress.ip_address(remote_addr) in ipaddress.ip_network(str(url)):
             match = True
     if not match:
         _barf(data,'ip-mismatch')
@@ -193,14 +192,14 @@ def run():
     # think something funky is going on.
     # datetime.datetime - datetime.datetime = datetime.timedelta (which is what
     # we actually want.)
-    timeobj = datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme)
+    timeobj = datetime.now(tz.tzutc) - parser.parse(tyme)
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
             ( evid, sp )
             )
         core_db.commit()
-        _barf(data, "expired ({} - {} = {})".format(datetime.datetime.now(pytz.utc).isoformat(' '), tyme, timeobj))
+        _barf(data, "expired ({} - {} = {})".format(datetime.now(tz.tzutc).isoformat(' '), tyme, timeobj))
         return 1
 
     ###
