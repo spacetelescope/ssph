@@ -27,7 +27,7 @@ except IOError:
 #####
 # database: sqlite
 # MOVE THE DATABASE LOCATION BEFORE ACTUAL USE
-if True:
+if False:
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
@@ -51,7 +51,7 @@ if False:
 #####
 # database: mysql
 
-if False:
+if True:
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
             'host'      : 'plssphdb2',
