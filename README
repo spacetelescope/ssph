@@ -157,8 +157,9 @@ Install a TP into /internal/data1/other/<tp dir>
 Make a logging directory for internal non-apache logs: 
 /internal/data1/other/logs
 
-Copy the cgi directory's files to the webroot (currently 
-/internal/data1/sites/ssph1.etc.stsci.edu/).
+Copy the cgi directory's files to the webroot (currently named
+/internal/data1/sites/ssph1.etc.stsci.edu/, for both 
+plssph4/ssph1.etc.stsci.edu AND plssph3/ssph2.etc.stsci.edu).
 
 Note that the CGI files must run the exact python installation (pointing 
 to the <environment>/bin/python executable), and manually add the path to 
