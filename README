@@ -107,12 +107,13 @@ of its use.
 
 --
 
-Installing SSPH
+Installing SSPH (for Pandeia Server usage)
 
 SSPH is a set of small python programs.
 
-always required:
-	pip install pandokia
+The specific dependencies are:
+pandokia
+dateutil
 
 for Microsoft SQL Server support:
 
@@ -130,9 +131,16 @@ for Postgres support:
 	pip install psycopg2
 		docs at http://initd.org/psycopg/docs/
 
+for SQLite3 support:
+    only python standard libraries needed
+
+(as of 2020-03-11 we will be using the full Pandeia TP package, which contains
+all the necessary code for mysql support)
+
 n.b. SSPH requires one database driver for itself.  If you will use
 Database Confirmation, you also need a driver for each type of
 database that the SP wants you to contact.
+(the Pandeia server uses CGI authentication)
 
 For high availability, you should use a high availability incoming proxy
 that can distribute across two or more instances of SSPH.  All instances
@@ -140,31 +148,23 @@ should be configured to use the same high availability database.
 
 Install the server package:
 
-	cp -r ssph_server /usr/lib/python2.6/site-packages
+The server code lives in a git repository in /internal/data1/other/pylibs/
 
-	vi /usr/lib/python2.6/site-packages/ssph_server/db.py
+Put a password file (pswd) in /internal/data1/other/config/
 
-	  password_file = '/usr/lib/python2.6/site-packages/ssph_server/pswd'
+Install a TP into /internal/data1/other/<tp dir>
 
-	  enter the database configuration you want to use
+Make a logging directory for internal non-apache logs: 
+/internal/data1/other/logs
 
-	  save file
+Copy the cgi directory's files to the webroot (currently named
+/internal/data1/sites/ssph1.etc.stsci.edu/, for both 
+plssph4/ssph1.etc.stsci.edu AND plssph3/ssph2.etc.stsci.edu).
 
- 	enter database password into file
+Note that the CGI files must run the exact python installation (pointing 
+to the <environment>/bin/python executable), and manually add the path to 
+the server code to the system PYTHONPATH. Make sure those paths are correct.
 
-	vi /usr/lib/python2.6/site-packages/ssph/password
-
-Change the owner/group/permissions to limit access to your apache user id.
-
-	chown apache /usr/lib/python2.6/site-packages/ssph_server/pswd
-	chgrp apache /usr/lib/python2.6/site-packages/ssph_server/pswd
-	chmod 600    /usr/lib/python2.6/site-packages/ssph_server/pswd
-
-Create the /secure and /unsecured urls on the server:
-
-	cd /var/www/html
-	mkdir secure unsecured
-
-changet install_server to use r_sedme instead of sedme
+Make sure all of the above files are readable by the apache user.
 
 

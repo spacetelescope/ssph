@@ -15,10 +15,9 @@ import hashlib
 import json
 import os
 import sys
-import ipaddr
-import datetime
-import iso8601
-import pytz
+import ipaddress
+from datetime import datetime
+from dateutil import parser, tz
 
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
 
@@ -38,16 +37,14 @@ debug = True
 # odd enough to be worth logging/alerting for.
 #
 
-def _barf(data, message) :
+def _barf(data, message):
     # if there is a reason to barf, we will just tell the client "barf"
-    print "Content-type: text/plain"
-    print ""
-    print "barf"
+    print("Content-type: text/plain\n\nbarf")
 
     # in debug mode, we will give a little more information.  This is
     # mainly for testing SSPH, not for clients.
-    if debug :
-        print message
+    if debug:
+        print(message)
 
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
     remote = os.environ["REMOTE_ADDR"]
@@ -56,7 +53,7 @@ def _barf(data, message) :
     # log to the apache error log
     sys.stderr.write(
         "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
-        % (datetime.datetime.now().isoformat(' '), remote, server, message)
+        % (datetime.now().isoformat(' '), remote, server, message)
         )
     sys.stderr.flush()
 
@@ -71,7 +68,7 @@ def _barf(data, message) :
 #
 #
 
-def run() :
+def run():
 
     # checking that the client is in the network range that we expect
     # to serve
@@ -94,8 +91,8 @@ def run() :
     match = False
     # service_net is now a dictionary, but we only want the values
     for url in service_net.values():
-        if ipaddr.IPv4Address(remote_addr) in ipaddr.IPNetwork(str(url)) :
-	    match = True
+        if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
+            match = True
     if not match:
         _barf(data,'ip-mismatch')
         sys.exit(1)
@@ -105,13 +102,13 @@ def run() :
 
     c = core_db.execute("SELECT dbtype, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
-    if ans is None :
+    if ans is None:
         # The service provider is not known to us.  We cannot proceed.
         # (Also, unknown SP should not make requests.)
         _barf(data, "sp-unk")
-        return 1
+        sys.exit(1)
 
-    dbtype, secret, hash = ans
+    dbtype, secret, hashtype = ans
 
     ###
     # This service provider is expected to use CGI confirmations?
@@ -120,57 +117,63 @@ def run() :
     # expected to use the CGI, then we do not need to allow this as a
     # potential attack vector.
 
-    if dbtype != "ssph" :
+    if dbtype != "ssph":
         # if this
         _barf(data, "mode")
-        return 1
+        sys.exit(1)
 
     ###
     # The demo use the secret 12345678.  A production SSPH
     # should not permit the demo value in the example.  It's too
     # much like setting your password to "password"
 
-    if not debug :
-        if secret == "12345678" :
-            print "content-type: text/plain\n\nbarf\n"
-            print "---\n\nreally? you used the demo secret in non-debug mode???\n\n---"
-        return 1
+    if not debug:
+        if secret == "12345678":
+            print("content-type: text/plain\n\nbarf\n")
+            print("---\n\nreally? you used the demo secret in non-debug mode???\n\n---")
+        sys.exit(1)
 
     ###
     # The different clients can be configured for different hash
     # algorithms.  Use the coolest one that the client supports.
-    try :
-        hash_ok = hash in hashlib.algorithms
-    except AttributeError :
+    try:
+        hash_ok = hashtype in hashlib.algorithms
+    except AttributeError:
         # python 2.6
-        hash_ok = hash in ( "md5", "sha1", "sha224", "sha256", "sha384", "sha512" )
+        hash_ok = hashtype in ("md5", "sha1", "sha224", "sha256", "sha384", "sha512")
 
-    if not hash_ok :
+    if not hash_ok:
         # Notice that the choice of hash algorithms is in the SSPH
         # database, so in principle you will never encounter this
         # case, but mistakes happen.
         _barf(data, "hash")
-        return 1
+        sys.exit(1)
 
     ###
     # compute the signature of the request
 
     # exec is ok because we know that hash is one of the strings from
     # hashlib.algorithms
-    exec "m = hashlib.%s()" % hash
-    m.update( sp )
-    m.update(" ")
-    m.update( evid )
-    m.update(" ")
-    m.update( secret )
+    # exec functionality changed in Python 3, so now we'll use the hashlib functionality
+    # The documentation warns that hashlib.new() is slow, so let's check for our most common
+    # case before committing to the slow method
+    if hashtype == "sha512":
+        m = hashlib.sha512()
+    else:
+        m = hashlib.new(hashtype)
+    m.update(sp.encode('utf-8'))
+    m.update(" ".encode('utf-8'))
+    m.update(evid.encode('utf-8'))
+    m.update(" ".encode('utf-8'))
+    m.update(secret.encode('utf-8'))
 
     ###
     # compare the submitted signature of the request to the computed signature
 
-    if signature != m.hexdigest() :
+    if signature != m.hexdigest():
         # the client does not know its own secret
         _barf(data, "hash-match")
-        return 1
+        sys.exit(1)
 
     ###
     # Look up the authentication cookie in the table of recent
@@ -179,12 +182,12 @@ def run() :
     # imply either a buggy SP or an attack.
     c = core_db.execute("""SELECT tyme, attribs FROM ssph_auth_events
             WHERE auth_event_id = :1 AND sp = :2 AND consumed = 'N' """,
-            ( evid, sp )
+            (evid, sp)
         )
     ans = c.fetchone()
-    if ans is None :
+    if ans is None:
         _barf(data, "cookie-missing")
-        return 1
+        sys.exit(1)
 
     # Finally, we have the information we are searching for.  This is
     # the data that was stored when the user was initially authenticated.
@@ -195,39 +198,41 @@ def run() :
     # think something funky is going on.
     # datetime.datetime - datetime.datetime = datetime.timedelta (which is what
     # we actually want.)
-    timeobj = datetime.datetime.now(pytz.utc) - iso8601.parse_date(tyme)
+    # The "Z" adds time zone information (UTC) to the tyme datetime object
+    timeobj = datetime.now(tz.UTC) - parser.isoparse(tyme + "Z")
     if timeobj.total_seconds() > 300:
         core_db.execute(
             "UPDATE ssph_auth_events SET consumed = 'E' WHERE auth_event_id = :1 AND sp = :2",
-            ( evid, sp )
+            (evid, sp)
             )
         core_db.commit()
-        _barf(data, "expired ({} - {} = {})".format(datetime.datetime.now(pytz.utc).isoformat(' '), tyme, timeobj))
-        return 1
+        _barf(data, "expired ({} - {} = {})".format(datetime.now(tz.UTC).isoformat(' '), tyme, timeobj))
+        sys.exit(1)
 
     ###
     # we have used this authentication record.  It may not be used again.
     core_db.execute(
         "UPDATE ssph_auth_events SET consumed = 'Y' WHERE auth_event_id = :1 AND sp = :2",
-        (  evid, sp )
+        (evid, sp)
         )
     core_db.commit()
 
     ###
     # sign the returned info with the same shared secret so the client
     # knows it really came from us.
-    exec "m = hashlib.%s()" % hash
-    m.update(attribs)
-    m.update(' ')
-    m.update(secret)
+    # See above for explanation of hashing
+    if hashtype == "sha512":
+        m = hashlib.sha512()
+    else:
+        m = hashlib.new(hashtype)
+    m.update(attribs.encode('utf-8'))
+    m.update(' '.encode('utf-8'))
+    m.update(secret.encode('utf-8'))
     signature = m.hexdigest()
 
     ###
     # send back 1 line of signature, then arbitrarily long information.
     # (in practice, it is usually a single line of json, but it might
     # be multi-line if somebody pretty printed it into the database.)
-    print "content-type: text/plain"
-    print ""
-    print signature
-    print attribs
-    return 0
+    print("content-type: text/plain\n\n{}\n{}".format(signature, attribs))
+    sys.exit()
