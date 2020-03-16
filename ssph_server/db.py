@@ -59,7 +59,7 @@ if True:
             'user'      : 'etcadmin',
             'passwd'    : password, # stored in /internal/data1/other/config/pswd
             'db'        : 'ssph',
-            'use_unicode' : False,
+            'use_unicode' : True,
             }
         )
 
