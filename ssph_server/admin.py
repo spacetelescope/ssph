@@ -13,6 +13,8 @@ permitted_users = (
     ('https://ssoportal.stsci.edu/idp/shibboleth', '2b73c1ee-90f9-4b24-87d5-6678dfd06276'),
     # riedel@stsci.edu
     ('https://ssoportal.stsci.edu/idp/shibboleth', 'a43c09e3-4d06-45c9-aa1b-62e4b72e8313'),
+    # dchittiraibalan@stsci.edu
+    ('https://ssoportal.stsci.edu/idp/shibboleth', 'dedb4dc0-f0bf-41e3-96ec-8c08e781a5ff'),
 )
 
 # no edit beyond here
