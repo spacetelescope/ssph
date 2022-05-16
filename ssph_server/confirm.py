@@ -45,12 +45,10 @@ def _barf(data, message):
         # in debug mode, we will give a little more information.  This is
         # mainly for testing SSPH, not for clients.
         if debug:
-            logfile.write(message)
-            logfile.write(str(data))
+            logfile.write("%s \n" %message)
+            logfile.write("%s \n" %data)
 
         # Who is the remote?  Who are we?  Who did it?  Log all of these.
-        #remote = os.environ["REMOTE_ADDR"]
-        #server = os.environ["SERVER_ADDR"]
         remote = os.getenv("REMOTE_ADDR", '')
         server = os.getenv("SERVER_ADDR", '')
 
@@ -77,13 +75,9 @@ def _barf(data, message):
 #
 
 def run():
-    _barf('no','start!!!!!!!!')
-
     # checking that the client is in the network range that we expect
     # to serve
     remote_addr = os.environ["REMOTE_ADDR"]
-    _barf('yes','meow')
-
     ###
 
     # Collect the fields of the query that was passed by the client.
@@ -96,7 +90,7 @@ def run():
         # the session authentication event id being validated
     signature = data["sig"].value
         # the hash computed by the client of the input for this request
-    _barf(data,'ip-validation %s' % str(remote_addr))
+    _barf(data,'ip-validation %s' % remote_addr)
 
     ### write your own if statements here
     match = False
