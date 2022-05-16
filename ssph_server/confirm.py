@@ -38,24 +38,29 @@ debug = True
 #
 
 def _barf(data, message):
-    # if there is a reason to barf, we will just tell the client "barf"
-    print("Content-type: text/plain\n\nbarf")
+    with open('/internal/data1/other/pylibs/logs.log','w') as logfile:
+        # if there is a reason to barf, we will just tell the client "barf"
+        logfile.write("Content-type: text/plain\n\nbarf")
 
-    # in debug mode, we will give a little more information.  This is
-    # mainly for testing SSPH, not for clients.
-    if debug:
-        print(message)
+        # in debug mode, we will give a little more information.  This is
+        # mainly for testing SSPH, not for clients.
+        if debug:
+            logfile.write(message)
 
-    # Who is the remote?  Who are we?  Who did it?  Log all of these.
-    remote = os.environ["REMOTE_ADDR"]
-    server = os.environ["SERVER_ADDR"]
+        # Who is the remote?  Who are we?  Who did it?  Log all of these.
+        remote = os.environ["REMOTE_ADDR"]
+        server = os.environ["SERVER_ADDR"]
 
+        logfile.write(
+            "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
+            % (datetime.now().isoformat(' '), remote, server, message)
+            )
     # log to the apache error log
-    sys.stderr.write(
-        "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
-        % (datetime.now().isoformat(' '), remote, server, message)
-        )
-    sys.stderr.flush()
+    #sys.stderr.write(
+    #    "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
+    #    % (datetime.now().isoformat(' '), remote, server, message)
+    #    )
+    #sys.stderr.flush()
 
     # add your own alerting here if you want some.
 
@@ -88,14 +93,14 @@ def run():
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
-  #  match = False
+    match = False
     # service_net is now a dictionary, but we only want the values
-  #  for url in service_net.values():
-  #      if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
-  #          match = True
-  #  if not match:
-  #      _barf(data,'ip-mismatch')
-  #      sys.exit(1)
+    for url in service_net.values():
+        if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
+            match = True
+    if not match:
+        _barf(data,'ip-mismatch')
+        sys.exit(1)
 
     ###
     # look up information about the service provider
