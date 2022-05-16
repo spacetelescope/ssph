@@ -46,6 +46,7 @@ def _barf(data, message):
         # mainly for testing SSPH, not for clients.
         if debug:
             logfile.write(message)
+            logfile.write(data)
 
         # Who is the remote?  Who are we?  Who did it?  Log all of these.
         remote = os.environ["REMOTE_ADDR"]
@@ -74,6 +75,7 @@ def _barf(data, message):
 #
 
 def run():
+    _barf({},f'start!!!!!!!!')
 
     # checking that the client is in the network range that we expect
     # to serve
