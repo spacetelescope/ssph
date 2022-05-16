@@ -88,14 +88,14 @@ def run():
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
-    match = False
+  #  match = False
     # service_net is now a dictionary, but we only want the values
-    for url in service_net.values():
-        if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
-            match = True
-    if not match:
-        _barf(data,'ip-mismatch')
-        sys.exit(1)
+  #  for url in service_net.values():
+  #      if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
+  #          match = True
+  #  if not match:
+  #      _barf(data,'ip-mismatch')
+  #      sys.exit(1)
 
     ###
     # look up information about the service provider
