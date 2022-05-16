@@ -49,8 +49,10 @@ def _barf(data, message):
             logfile.write(data)
 
         # Who is the remote?  Who are we?  Who did it?  Log all of these.
-        remote = os.environ["REMOTE_ADDR"]
-        server = os.environ["SERVER_ADDR"]
+        #remote = os.environ["REMOTE_ADDR"]
+        #server = os.environ["SERVER_ADDR"]
+        remote = os.getenv("REMOTE_ADDR", '')
+        server = os.getenv("SERVER_ADDR", '')
 
         logfile.write(
             "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
@@ -80,6 +82,7 @@ def run():
     # checking that the client is in the network range that we expect
     # to serve
     remote_addr = os.environ["REMOTE_ADDR"]
+    _barf({},'start!!!!!!!!')
 
     ###
 
