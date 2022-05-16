@@ -40,7 +40,7 @@ debug = True
 def _barf(data, message):
     with open('/home/svc_ssph/logs.log','a') as logfile:
         # if there is a reason to barf, we will just tell the client "barf"
-        logfile.write("Content-type: text/plain\n\nbarf")
+        logfile.write("Content-type: text/plain\n\nbarf\n")
 
         # in debug mode, we will give a little more information.  This is
         # mainly for testing SSPH, not for clients.
@@ -77,12 +77,12 @@ def _barf(data, message):
 #
 
 def run():
-    _barf({},'start!!!!!!!!')
+    _barf('no','start!!!!!!!!')
 
     # checking that the client is in the network range that we expect
     # to serve
     remote_addr = os.environ["REMOTE_ADDR"]
-    _barf({},'start!!!!!!!!')
+    _barf('yes','meow')
 
     ###
 
