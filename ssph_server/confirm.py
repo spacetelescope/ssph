@@ -77,7 +77,7 @@ def _barf(data, message):
 def run():
     # checking that the client is in the network range that we expect
     # to serve
-    remote_addr = os.environ["REMOTE_ADDR"]
+    remote_addr = os.getenv("REMOTE_ADDR", '')
     ###
 
     # Collect the fields of the query that was passed by the client.
