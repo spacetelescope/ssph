@@ -6,8 +6,5 @@ sys.path.append("/internal/data1/other/pylibs/ssph")
 import os
 import ssph_server.confirm as r
 
-with open('/home/svc_ssph/logs.log','w') as logfile:
-    logfile.write("We are here!!!")
-
 sys.exit(r.run())
 
