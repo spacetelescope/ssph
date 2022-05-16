@@ -38,7 +38,7 @@ debug = True
 #
 
 def _barf(data, message):
-    with open('/home/svc_ssph/logs.log','w') as logfile:
+    with open('/home/svc_ssph/logs.log','a') as logfile:
         # if there is a reason to barf, we will just tell the client "barf"
         logfile.write("Content-type: text/plain\n\nbarf")
 
@@ -75,7 +75,7 @@ def _barf(data, message):
 #
 
 def run():
-    _barf({},f'start!!!!!!!!')
+    _barf({},'start!!!!!!!!')
 
     # checking that the client is in the network range that we expect
     # to serve
