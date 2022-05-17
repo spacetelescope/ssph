@@ -45,6 +45,11 @@ def _barf(data, message):
     # log to the place that we can look into because we don't have access
     # to apache error log
     with open('/home/svc_ssph/logs.log','a') as logfile:
+        logfile.write(
+            "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
+            % (datetime.now().isoformat(' '), remote, server, message)
+        )
+
         # if there is a reason to barf, we will just tell the client "barf"
         logfile.write("Content-type: text/plain\n\nbarf\n")
 
@@ -52,11 +57,6 @@ def _barf(data, message):
         # mainly for testing SSPH, not for clients.
         if debug:
             logfile.write("%s \n" %data)
-
-        logfile.write(
-            "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
-            % (datetime.now().isoformat(' '), remote, server, message)
-            )
 
     # log to the apache error log
     sys.stderr.write(
