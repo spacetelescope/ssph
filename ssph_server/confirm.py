@@ -38,6 +38,9 @@ debug = True
 #
 
 def _barf(data, message):
+    # if there is a reason to barf, we will just tell the client "barf"
+    print("Content-type: text/plain\n\nbarf\n")
+
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
     remote = os.getenv("REMOTE_ADDR", '')
     server = os.getenv("SERVER_ADDR", '')
@@ -54,10 +57,6 @@ def _barf(data, message):
         # mainly for testing SSPH, not for clients.
         if debug:
             logfile.write("%s \n" %data)
-
-
-    # if there is a reason to barf, we will just tell the client "barf"
-    print("Content-type: text/plain\n\nbarf\n")
 
     # log to the apache error log
     sys.stderr.write(
