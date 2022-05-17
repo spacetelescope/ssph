@@ -38,6 +38,12 @@ debug = True
 #
 
 def _barf(data, message):
+    # Who is the remote?  Who are we?  Who did it?  Log all of these.
+    remote = os.getenv("REMOTE_ADDR", '')
+    server = os.getenv("SERVER_ADDR", '')
+
+    # log to the place that we can look into because we don't have access
+    # to apache error log
     with open('/home/svc_ssph/logs.log','a') as logfile:
         # if there is a reason to barf, we will just tell the client "barf"
         logfile.write("Content-type: text/plain\n\nbarf\n")
@@ -45,23 +51,19 @@ def _barf(data, message):
         # in debug mode, we will give a little more information.  This is
         # mainly for testing SSPH, not for clients.
         if debug:
-            logfile.write("%s \n" %message)
             logfile.write("%s \n" %data)
-
-        # Who is the remote?  Who are we?  Who did it?  Log all of these.
-        remote = os.getenv("REMOTE_ADDR", '')
-        server = os.getenv("SERVER_ADDR", '')
 
         logfile.write(
             "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
             % (datetime.now().isoformat(' '), remote, server, message)
             )
+
     # log to the apache error log
-    #sys.stderr.write(
-    #    "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
-    #    % (datetime.now().isoformat(' '), remote, server, message)
-    #    )
-    #sys.stderr.flush()
+    sys.stderr.write(
+        "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
+        % (datetime.now().isoformat(' '), remote, server, message)
+        )
+    sys.stderr.flush()
 
     # add your own alerting here if you want some.
 
@@ -90,7 +92,6 @@ def run():
         # the session authentication event id being validated
     signature = data["sig"].value
         # the hash computed by the client of the input for this request
-    _barf(data,'ip-validation %s' % remote_addr)
 
     ### write your own if statements here
     match = False
