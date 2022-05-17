@@ -50,13 +50,14 @@ def _barf(data, message):
             % (datetime.now().isoformat(' '), remote, server, message)
         )
 
-        # if there is a reason to barf, we will just tell the client "barf"
-        logfile.write("Content-type: text/plain\n\nbarf\n")
-
         # in debug mode, we will give a little more information.  This is
         # mainly for testing SSPH, not for clients.
         if debug:
             logfile.write("%s \n" %data)
+
+
+    # if there is a reason to barf, we will just tell the client "barf"
+    print("Content-type: text/plain\n\nbarf\n")
 
     # log to the apache error log
     sys.stderr.write(
