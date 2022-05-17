@@ -5,6 +5,5 @@ sys.path.append("/internal/data1/other/pylibs/ssph")
 
 import os
 import ssph_server.confirm as r
-
 sys.exit(r.run())
 
