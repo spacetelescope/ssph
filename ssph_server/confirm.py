@@ -92,6 +92,7 @@ def run():
         # the session authentication event id being validated
     signature = data["sig"].value
         # the hash computed by the client of the input for this request
+    _barf(data,'ip-validation %s' % remote_addr)
 
     ### write your own if statements here
     match = False
