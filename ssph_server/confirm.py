@@ -39,22 +39,21 @@ debug = True
 
 def _barf(data, message):
     # if there is a reason to barf, we will just tell the client "barf"
-    print("Content-type: text/plain\n\nbarf")
-
-    # in debug mode, we will give a little more information.  This is
-    # mainly for testing SSPH, not for clients.
-    if debug:
-        print(message)
+    print("Content-type: text/plain\n\nbarf\n")
 
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
-    remote = os.environ["REMOTE_ADDR"]
-    server = os.environ["SERVER_ADDR"]
+    remote = os.getenv("REMOTE_ADDR", '')
+    server = os.getenv("SERVER_ADDR", '')
 
     # log to the apache error log
     sys.stderr.write(
         "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
         % (datetime.now().isoformat(' '), remote, server, message)
         )
+    # in debug mode, we will give a little more information.  This is
+    # mainly for testing SSPH, not for clients.
+    if debug:
+        sys.stderr.write("%s \n" %data)
     sys.stderr.flush()
 
     # add your own alerting here if you want some.
@@ -69,11 +68,9 @@ def _barf(data, message):
 #
 
 def run():
-
     # checking that the client is in the network range that we expect
     # to serve
-    remote_addr = os.environ["REMOTE_ADDR"]
-
+    remote_addr = os.getenv("REMOTE_ADDR", '')
     ###
 
     # Collect the fields of the query that was passed by the client.

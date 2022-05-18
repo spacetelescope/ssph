@@ -112,7 +112,7 @@ def run():
         sys.exit()
 
     if 'listau' in data:
-        t = listtb('ssph_auth_events', 'ORDER BY tyme')
+        t = listtb('ssph_auth_events', 'ORDER BY tyme DESC LIMIT 100')
         print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
         sys.exit()
 
