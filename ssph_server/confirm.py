@@ -45,24 +45,15 @@ def _barf(data, message):
     remote = os.getenv("REMOTE_ADDR", '')
     server = os.getenv("SERVER_ADDR", '')
 
-    # log to the place that we can look into because we don't have access
-    # to apache error log
-    with open('/home/svc_ssph/logs.log','a') as logfile:
-        logfile.write(
-            "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
-            % (datetime.now().isoformat(' '), remote, server, message)
-        )
-
-        # in debug mode, we will give a little more information.  This is
-        # mainly for testing SSPH, not for clients.
-        if debug:
-            logfile.write("%s \n" %data)
-
     # log to the apache error log
     sys.stderr.write(
         "\n\n\nERROR IN SSPH? date: %s from: %s to: %s type: %s\n\n"
         % (datetime.now().isoformat(' '), remote, server, message)
         )
+    # in debug mode, we will give a little more information.  This is
+    # mainly for testing SSPH, not for clients.
+    if debug:
+        sys.stderr.write("%s \n" %data)
     sys.stderr.flush()
 
     # add your own alerting here if you want some.
