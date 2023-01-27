@@ -19,6 +19,8 @@ import ipaddress
 from datetime import datetime
 from dateutil import parser, tz
 
+# this file contains the list of subnet (private / public / DMZ) IPv4 CIDRs 
+# for each mission and envrionment type (say JWST DEV, JWST OPS, HST DEV)
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
 
 with open(urlfile,'r') as servicefile:
