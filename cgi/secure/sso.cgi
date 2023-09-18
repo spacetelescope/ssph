@@ -1,4 +1,4 @@
-#!/internal/data1/other/tp_15/envs/pandeia_15/bin/python
+#!/internal/data1/other/tp_16/envs/pandeia_16/bin/python
 from os import environ
 from re import match, compile
 
