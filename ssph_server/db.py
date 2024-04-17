@@ -20,7 +20,21 @@ import os.path
 password_file = '/internal/data1/other/config/pswd'
 
 try:
-    password = open(password_file, "r").readline().strip()
+    with open(fn) as f:
+        encpwd = f.readline().strip()
+        encpwdbyt = bytes(encpwd, 'utf-8')
+    f.close()
+
+    # read key and convert into byte
+    with open(kn) as f:
+        refKey = ''.join(f.readlines())
+        refKeybyt = bytes(refKey, 'utf-8')
+    f.close()
+
+    # use the key and encrypt pwd
+    keytouse = Fernet(refKeybyt)
+    pwbyt = (keytouse.decrypt(encpwdbyt))
+    password = pwbyt.decode("utf-8")
 except IOError:
     password = None
 
