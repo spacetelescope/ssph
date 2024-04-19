@@ -73,7 +73,7 @@ if True:
             'host'      : 'plssphdb2',
             'port'      : 3306,
             'user'      : 'etcadmin',
-            'passwd'    : password, # stored in /internal/data1/other/config/pswd
+            'passwd'    : password, # stored in /internal/data1/other/config/encrypted_pswd
             'db'        : 'ssph',
             'use_unicode' : True,
             }
