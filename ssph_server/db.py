@@ -18,16 +18,17 @@ from cryptography.fernet import Fernet
 # The database password is stored in a separate file that belongs
 # to the apache user.  Here is the name of the file.
 
-password_file = '/internal/data1/other/config/pswd'
+password_file = '/internal/data1/other/config/encrypted_pswd'
+key_file = '/internal/data1/other/config/ref_key'
 
 try:
-    with open(fn) as f:
+    with open(password_file) as f:
         encpwd = f.readline().strip()
         encpwdbyt = bytes(encpwd, 'utf-8')
     f.close()
 
     # read key and convert into byte
-    with open(kn) as f:
+    with open(key_file) as f:
         refKey = ''.join(f.readlines())
         refKeybyt = bytes(refKey, 'utf-8')
     f.close()
