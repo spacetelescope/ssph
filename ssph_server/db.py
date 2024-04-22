@@ -10,6 +10,7 @@
 #
 
 import os.path
+from cryptography.fernet import Fernet
 
 #####
 # database password - common to all
@@ -17,10 +18,25 @@ import os.path
 # The database password is stored in a separate file that belongs
 # to the apache user.  Here is the name of the file.
 
-password_file = '/internal/data1/other/config/pswd'
+password_file = '/internal/data1/other/config/encrypted_pswd'
+key_file = '/internal/data1/other/config/ref_key'
 
 try:
-    password = open(password_file, "r").readline().strip()
+    with open(password_file) as f:
+        encpwd = f.readline().strip()
+        encpwdbyt = bytes(encpwd, 'utf-8')
+    f.close()
+
+    # read key and convert into byte
+    with open(key_file) as f:
+        refKey = ''.join(f.readlines())
+        refKeybyt = bytes(refKey, 'utf-8')
+    f.close()
+
+    # use the key and encrypt pwd
+    keytouse = Fernet(refKeybyt)
+    pwbyt = (keytouse.decrypt(encpwdbyt))
+    password = pwbyt.decode("utf-8").strip()
 except IOError:
     password = None
 
@@ -57,7 +73,7 @@ if True:
             'host'      : 'plssphdb2',
             'port'      : 3306,
             'user'      : 'etcadmin',
-            'passwd'    : password, # stored in /internal/data1/other/config/pswd
+            'passwd'    : password, # stored in /internal/data1/other/config/encrypted_pswd
             'db'        : 'ssph',
             'use_unicode' : True,
             }
