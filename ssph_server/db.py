@@ -36,7 +36,7 @@ try:
     # use the key and encrypt pwd
     keytouse = Fernet(refKeybyt)
     pwbyt = (keytouse.decrypt(encpwdbyt))
-    password = pwbyt.decode("utf-8")
+    password = pwbyt.decode("utf-8").strip()
 except IOError:
     password = None
 
