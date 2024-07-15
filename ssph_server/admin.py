@@ -9,12 +9,18 @@ Edit the source code to grant permissions.
 # put a list of stsci_uuid of people who are permitted to create an SP here.
 # These people can see and submit this form.
 permitted_users = (
-    # olitten@stsci.edu
+    # otam@stsci.edu
     ('https://ssoportal.stsci.edu/idp/shibboleth', '2b73c1ee-90f9-4b24-87d5-6678dfd06276'),
     # riedel@stsci.edu
     ('https://ssoportal.stsci.edu/idp/shibboleth', 'a43c09e3-4d06-45c9-aa1b-62e4b72e8313'),
     # dchittiraibalan@stsci.edu
     ('https://ssoportal.stsci.edu/idp/shibboleth', 'dedb4dc0-f0bf-41e3-96ec-8c08e781a5ff'),
+    # sontag@stsci.edu
+    ('https://ssoportal.stsci.edu/idp/shibboleth', '99d5b6f9-8a36-46dc-8e0a-99fe54548a32'),
+    # ispitzer@stsci.edu
+    ('https://ssoportal.stsci.edu/idp/shibboleth', '137490cb-a969-4a3d-b3e4-e0a28d67df8b'),
+    # laidler@stsci.edu
+    ('https://ssoportal.stsci.edu/idp/shibboleth', '4bea59fe-03ac-47d0-8894-7f29f8247812'),
 )
 
 # no edit beyond here
