@@ -28,14 +28,15 @@ permitted_users = (
 
 import sys
 from urllib import parse
+import datetime
 import os
-import cgitb
+import faulthandler
 import pandokia.text_table
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
 from ssph_server.db import core_db
 
-cgitb.enable(display=0, logdir="/internal/data1/other/logs")
+faulthandler.enable(file=f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}")
 
 from ssph_server.admin_text import html_page
 
@@ -50,8 +51,8 @@ def run():
     # we never get here unless we are authorized IT people, so it is ok
     # to enable tracebacks.  It is easier than providing proper error
     # messages.
-    import cgitb
-    cgitb.enable(display=0, logdir="/internal/data1/other/logs")
+    import faulthandler
+    faulthandler.enable(file=f"/internal/data1/other/logs{datetime.datetime.now().isoformat()}")
 
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
