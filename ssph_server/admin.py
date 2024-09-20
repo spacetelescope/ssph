@@ -52,7 +52,7 @@ def run():
     # to enable tracebacks.  It is easier than providing proper error
     # messages.
     import faulthandler
-    faulthandler.enable(file=f"/internal/data1/other/logs{datetime.datetime.now().isoformat()}")
+    faulthandler.enable(file=f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}")
 
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
@@ -62,7 +62,7 @@ def run():
         from ssph_server.db import password_file
         f=open(password_file,"w")
         os.chmod(password_file, 0o600)
-        f.write(data['db_pass'].value)
+        f.write(data['db_pass'][0])
         f.close()
         print("content-type: text/plain\n\ndone")
         sys.exit()
