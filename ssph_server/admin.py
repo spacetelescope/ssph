@@ -56,6 +56,9 @@ def run():
 
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
+    with open("/internal/data1/other/logs/datalog", "a") as outfile:
+        outfile.write(datetime.datetime.now().isoformat())
+        outfile.write(data)
     #data = cgi.FieldStorage()
 
     if 'db_pass' in data:
