@@ -189,7 +189,7 @@ def run():
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
     # about time zones.
-    tyme = datetime.datetime.utcnow().isoformat(' ')
+    tyme = datetime.datetime.now(tz=datetime.timezone.utc).isoformat(' ')
 
     sys.stderr.write(tyme)
     sys.stderr.flush()
