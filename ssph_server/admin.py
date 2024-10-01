@@ -36,8 +36,8 @@ import pandokia.text_table
 # text_table and then display it as html.
 from ssph_server.db import core_db
 
-with open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w") as logfile:
-    faulthandler.enable(file=logfile)
+logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
+faulthandler.enable(file=logfile)
 
 from ssph_server.admin_text import html_page
 
@@ -53,8 +53,8 @@ def run():
     # to enable tracebacks.  It is easier than providing proper error
     # messages.
     import faulthandler
-    with open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w") as logfile:
-        faulthandler.enable(file=logfile)
+    logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
+    faulthandler.enable(file=logfile)
 
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
@@ -104,6 +104,8 @@ def run():
 
         core_db.commit()
         print("content-type: text/plain\n\ndone")
+        faulthandler.disable()
+        logfile.close()
         sys.exit()
 
     if 'delete_sp' in data:
