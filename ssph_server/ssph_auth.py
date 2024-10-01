@@ -43,8 +43,9 @@ import re
 from ssph_server.db import core_db
 
 if debug:
-    import cgitb
-    cgitb.enable()
+    import faulthandler
+    with open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w") as logfile:
+        faulthandler.enable(file=logfile)
 
 # This function creates an identifier for the newly authenticated session.
 #
