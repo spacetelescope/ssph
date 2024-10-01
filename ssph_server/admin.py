@@ -65,7 +65,8 @@ def run():
         outfile.write("\n")
         outfile.write(os.environ["QUERY_STRING"])
         outfile.write("\n")
-        outfile.write(data)
+        for x in data:
+            outfile.write(f"{x}: {data[x][0]}\n")
         outfile.write("\n\n")
     #data = cgi.FieldStorage()
 
