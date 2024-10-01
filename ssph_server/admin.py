@@ -36,8 +36,8 @@ import pandokia.text_table
 # text_table and then display it as html.
 from ssph_server.db import core_db
 
-with open(f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}.log", "w") as logfile:
-    faulthandler.enable(file=logfile)
+#with open(f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}.log", "w") as logfile:
+#    faulthandler.enable(file=logfile)
 
 from ssph_server.admin_text import html_page
 
@@ -55,9 +55,9 @@ def run():
     # we never get here unless we are authorized IT people, so it is ok
     # to enable tracebacks.  It is easier than providing proper error
     # messages.
-    import faulthandler
-    with open(f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}.log", "w") as logfile:
-        faulthandler.enable(file=logfile)
+    #import faulthandler
+    #with open(f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}", "w") as logfile:
+    #    faulthandler.enable(file=logfile)
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
     with open("datalog", "a") as outfile:
