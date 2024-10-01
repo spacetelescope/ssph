@@ -41,7 +41,7 @@ faulthandler.enable(file=f"/internal/data1/other/logs/{datetime.datetime.now().i
 from ssph_server.admin_text import html_page
 
 def run():
-    with open("/internal/data1/other/logs/datalog", "a") as outfile:
+    with open("datalog", "a") as outfile:
         outfile.write("Basic Run\n")
 
     # BUG: include the IDP in this test
@@ -59,7 +59,7 @@ def run():
 
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
-    with open("/internal/data1/other/logs/datalog", "a") as outfile:
+    with open("datalog", "a") as outfile:
         outfile.write(datetime.datetime.now().isoformat())
         outfile.write("\n")
         outfile.write(os.environ["QUERY_STRING"])
