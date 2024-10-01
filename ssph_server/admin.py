@@ -60,7 +60,7 @@ def run():
     #    faulthandler.enable(file=logfile)
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
-    with open("datalog", "a") as outfile:
+    with open("/internal/data1/other/logs/datalog", "a") as outfile:
         outfile.write(datetime.datetime.now().isoformat())
         outfile.write("\n")
         outfile.write(os.environ["QUERY_STRING"])
