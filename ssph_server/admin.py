@@ -41,6 +41,9 @@ faulthandler.enable(file=f"/internal/data1/other/logs/{datetime.datetime.now().i
 from ssph_server.admin_text import html_page
 
 def run():
+    with open("/internal/data1/other/logs/datalog", "a") as outfile:
+        outfile.write("Basic Run\n")
+
     # BUG: include the IDP in this test
     if not (os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']) in permitted_users:
         print("status: 500\ncontent-type: text/plain\n")
@@ -58,7 +61,11 @@ def run():
     data = parse.parse_qs(os.environ["QUERY_STRING"])
     with open("/internal/data1/other/logs/datalog", "a") as outfile:
         outfile.write(datetime.datetime.now().isoformat())
+        outfile.write("\n")
+        outfile.write(os.environ["QUERY_STRING"])
+        outfile.write("\n")
         outfile.write(data)
+        outfile.write("\n\n")
     #data = cgi.FieldStorage()
 
     if 'db_pass' in data:
