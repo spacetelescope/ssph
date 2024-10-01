@@ -44,8 +44,8 @@ cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 from ssph_server.admin_text import html_page
 
 def run():
-    with open("/internal/data1/other/logs/datalog", "a") as outfile:
-        outfile.write("Basic Run\n")
+    # with open("/internal/data1/other/logs/datalog", "a") as outfile:
+    #     outfile.write("Basic Run\n")
 
     # BUG: include the IDP in this test
     if not (os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']) in permitted_users:
