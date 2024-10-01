@@ -52,9 +52,9 @@ def run():
     # we never get here unless we are authorized IT people, so it is ok
     # to enable tracebacks.  It is easier than providing proper error
     # messages.
-    import faulthandler
-    logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
-    faulthandler.enable(file=logfile)
+    #import faulthandler
+    #logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
+    #faulthandler.enable(file=logfile)
 
     # get the cgi parameters
     data = parse.parse_qs(os.environ["QUERY_STRING"])
@@ -104,8 +104,8 @@ def run():
 
         core_db.commit()
         print("content-type: text/plain\n\ndone")
-        faulthandler.disable()
-        logfile.close()
+        #faulthandler.disable()
+        #logfile.close()
         sys.exit()
 
     if 'delete_sp' in data:
