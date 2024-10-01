@@ -36,8 +36,8 @@ import pandokia.text_table
 # text_table and then display it as html.
 from ssph_server.db import core_db
 
-logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
-faulthandler.enable(file=logfile)
+#logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
+#faulthandler.enable(file=logfile)
 
 from ssph_server.admin_text import html_page
 
