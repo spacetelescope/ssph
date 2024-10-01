@@ -10,7 +10,7 @@ For extra bonus security, we could keep an IP list of servers that
 host each SP, but I don't think it is worth the extra work.
 
 """
-import cgi
+from urllib import parse
 import hashlib
 import json
 import os
@@ -78,13 +78,13 @@ def run():
 
     # Collect the fields of the query that was passed by the client.
     # Quietly ignore unexpected fields.
-    data = cgi.FieldStorage()
+    data = parse.parse_qs(os.environ["QUERY_STRING"])
 
-    sp = data["sp"].value
+    sp = data["sp"][0]
         # the name of the SP that is the client here
-    evid = data["evid"].value
+    evid = data["evid"][0]
         # the session authentication event id being validated
-    signature = data["sig"].value
+    signature = data["sig"][0]
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
