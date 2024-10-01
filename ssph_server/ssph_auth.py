@@ -120,7 +120,7 @@ def run():
             print("Do not know your application: ",sp)
         sys.stderr.write(
             "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
-            % (sp, datetime.now().isoformat())
+            % (sp, datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             )
         sys.stderr.flush()
 
@@ -189,7 +189,7 @@ def run():
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
     # about time zones.
-    tyme = datetime.now(tz=timezone.utc).isoformat(' ')
+    tyme = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")
 
     sys.stderr.write(tyme)
     sys.stderr.flush()
