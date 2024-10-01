@@ -30,12 +30,14 @@ import sys
 from urllib import parse
 import datetime
 import os
+import cgitb
 import faulthandler
 import pandokia.text_table
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
 from ssph_server.db import core_db
 
+cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 #with open(f"/internal/data1/other/logs/{datetime.datetime.now().isoformat()}.log", "w") as logfile:
 #    faulthandler.enable(file=logfile)
 
@@ -51,6 +53,9 @@ def run():
         print("\nlogged in but not permitted to admin\n")
         print("you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'])
         sys.exit(1)
+
+    import cgitb
+    cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 
     # we never get here unless we are authorized IT people, so it is ok
     # to enable tracebacks.  It is easier than providing proper error
