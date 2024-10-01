@@ -37,7 +37,7 @@ import os
 import re
 import json
 import time
-import datetime
+from datetime import datetime, timezone
 import re
 
 from ssph_server.db import core_db
@@ -120,7 +120,7 @@ def run():
             print("Do not know your application: ",sp)
         sys.stderr.write(
             "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
-            % (sp, datetime.datetime.now().isoformat())
+            % (sp, datetime.now().isoformat())
             )
         sys.stderr.flush()
 
@@ -189,7 +189,7 @@ def run():
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
     # about time zones.
-    tyme = datetime.datetime.utcnow().isoformat(' ')
+    tyme = datetime.now(tz=timezone.utc).isoformat(' ')
 
     sys.stderr.write(tyme)
     sys.stderr.flush()
