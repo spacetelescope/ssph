@@ -19,6 +19,7 @@ for i in sorted(environ):
 
 data = parse.parse_qs(environ["QUERY_STRING"])
 
+print("<p>Query String</p>")
 for x in data:
   print(f"<p>{x}:{data[x]}</p>")
 
