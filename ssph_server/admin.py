@@ -60,7 +60,7 @@ def run():
         from ssph_server.db import password_file
         f=open(password_file,"w")
         os.chmod(password_file, 0o600)
-        f.write(data['db_pass'].value)
+        f.write(data['db_pass'][0])
         f.close()
         print("content-type: text/plain\n\ndone")
         sys.exit()
@@ -77,7 +77,7 @@ def run():
         import json
         from ssph_server.db import core_db
 
-        dbcreds = data['dbcreds'].value
+        dbcreds = data['dbcreds'][0]
 
         if dbcreds != "":
             dbcreds = json.dumps(json.loads(dbcreds))
@@ -88,14 +88,14 @@ def run():
             VALUES
             ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
             """,
-            (   data['sp'].value,
-                data['url'].value,
-                data['dbtype'].value,
+            (   data['sp'][0],
+                data['url'][0],
+                data['dbtype'][0],
                 dbcreds,
-                data['contact'].value,
-                data['email'].value,
-                data['secret'].value,
-                data['hash'].value
+                data['contact'][0],
+                data['email'][0],
+                data['secret'][0],
+                data['hash'][0]
             )
         )
 
@@ -106,7 +106,7 @@ def run():
     if 'delete_sp' in data:
         from ssph_server.db import core_db
         c = core_db.execute("DELETE FROM ssph_sp_info WHERE sp = :1 ",
-            (data['delete_sp'].value,)
+            (data['delete_sp'][0],)
             )
         core_db.commit()
         print("content-type: text/plain\n\ndone")
