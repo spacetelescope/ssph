@@ -32,7 +32,7 @@ else:
 debug = False
 
 import sys
-import cgi
+from urllib import parse
 import os
 import re
 import json
@@ -85,17 +85,17 @@ def run():
     # sp=... giving the name of the service provider that is requesting
     # service.
 
-    data = cgi.FieldStorage()
+    data = parse.parse_qs(os.environ["QUERY_STRING"])
 
     if "sp" in data:
-        sp = data["sp"].value.strip()
+        sp = data["sp"][0].strip()
     else:
         print("Content-type: text/plain\n")
         if debug:
             print("SSO did not return the SP field")
             print("CGI ARGS")
             for x in data:
-                print(data[x].value)
+                print(data[x][0])
             print("ENVIRONMENT")
             for x in sorted([x for x in os.environ]):
                 print("%s=%s"%(x,os.environ[x]))
