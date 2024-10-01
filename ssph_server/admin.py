@@ -27,7 +27,7 @@ permitted_users = (
 #######
 
 import sys
-import cgi
+from urllib import parse
 import os
 import cgitb
 import pandokia.text_table
@@ -54,7 +54,7 @@ def run():
     cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 
     # get the cgi parameters
-    data = cgi.FieldStorage()
+    data = parse.parse_qs(os.environ["QUERY_STRING"])
 
     if 'db_pass' in data:
         from ssph_server.db import password_file
