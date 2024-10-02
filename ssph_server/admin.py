@@ -48,7 +48,7 @@ def run():
     # get the cgi parameters
     if os.environ["REQUEST_METHOD"] == "GET":
         data = parse.parse_qs(os.environ["QUERY_STRING"])
-    elif os.environ["REQUEST_METHOD"] == "POST":
+    else:# os.environ["REQUEST_METHOD"] == "POST":
         data, files = multipart.parse(os.environ)
 
     if 'db_pass' in data:
