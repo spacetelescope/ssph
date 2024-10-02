@@ -29,15 +29,11 @@ permitted_users = (
 import sys
 from urllib import parse
 import os
-import faulthandler
-from datetime import datetime
+import multipart
 import pandokia.text_table
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
 from ssph_server.db import core_db
-
-#logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
-#faulthandler.enable(file=logfile)
 
 from ssph_server.admin_text import html_page
 
@@ -49,15 +45,11 @@ def run():
         print("you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'])
         sys.exit(1)
 
-    # we never get here unless we are authorized IT people, so it is ok
-    # to enable tracebacks.  It is easier than providing proper error
-    # messages.
-    #import faulthandler
-    #logfile = open(f"/internal/data1/other/logs/{datetime.now().isoformat()}.log", "w")
-    #faulthandler.enable(file=logfile)
-
     # get the cgi parameters
-    data = parse.parse_qs(os.environ["QUERY_STRING"])
+    if os.environ["REQUEST_METHOD"] == "GET":
+        data = parse.parse_qs(os.environ["QUERY_STRING"])
+    elif os.environ["REQUEST_METHOD"] == "POST":
+        data, files = multipart.parse(os.environ)
 
     if 'db_pass' in data:
         from ssph_server.db import password_file
@@ -104,8 +96,7 @@ def run():
 
         core_db.commit()
         print("content-type: text/plain\n\ndone")
-        #faulthandler.disable()
-        #logfile.close()
+
         sys.exit()
 
     if 'delete_sp' in data:
