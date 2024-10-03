@@ -26,114 +26,110 @@ permitted_users = (
 # no edit beyond here
 #######
 
-import sys
-import cgi
 import os
-import cgitb
-import pandokia.text_table
+import sys
+
+from flask import Flask, request, redirect
+
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
+import pandokia.text_table
 from ssph_server.db import core_db
-
-cgitb.enable(display=0, logdir="/internal/data1/other/logs")
 
 from ssph_server.admin_text import html_page
 
+
+app = Flask(__name__)
+
+@app.route("/ssph_admin.cgi", methods=["GET", "POST"])
 def run():
     # BUG: include the IDP in this test
     if not (os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']) in permitted_users:
-        print("status: 500\ncontent-type: text/plain\n")
-        print("\nlogged in but not permitted to admin\n")
-        print("you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'])
-        sys.exit(1)
+        msg = "status: 500\ncontent-type: text/plain\n"
+        msg += "\nlogged in but not permitted to admin\n"
+        msg += f"you are {os.environ["Shib_Identity_Provider"]}, {os.environ['STScI_UUID']}" 
+        return msg
 
-    # we never get here unless we are authorized IT people, so it is ok
-    # to enable tracebacks.  It is easier than providing proper error
-    # messages.
-    import cgitb
-    cgitb.enable(display=0, logdir="/internal/data1/other/logs")
+    # # get the cgi parameters
+    # data = cgi.FieldStorage()
 
-    # get the cgi parameters
-    data = cgi.FieldStorage()
+    # if 'db_pass' in data:
+    #     from ssph_server.db import password_file
+    #     f=open(password_file,"w")
+    #     os.chmod(password_file, 0o600)
+    #     f.write(data['db_pass'].value)
+    #     f.close()
+    #     print("content-type: text/plain\n\ndone")
+    #     sys.exit()
 
-    if 'db_pass' in data:
-        from ssph_server.db import password_file
-        f=open(password_file,"w")
-        os.chmod(password_file, 0o600)
-        f.write(data['db_pass'].value)
-        f.close()
-        print("content-type: text/plain\n\ndone")
-        sys.exit()
+    # if 'get_db_pass' in data:
+    #     from ssph_server.db import password_file
+    #     f=open(password_file,"r")
+    #     print("content-type: text/plain\n\n{}".format(f.read()))
+    #     f.close()
+    #     sys.exit()
 
-    if 'get_db_pass' in data:
-        from ssph_server.db import password_file
-        f=open(password_file,"r")
-        print("content-type: text/plain\n\n{}".format(f.read()))
-        f.close()
-        sys.exit()
+    # if "form_test" in data:
+    #     print("content-type: text/plain\n\n")
+    #     for x in data:
+    #         print(f"{x}: {data[x]}\n")
+    #     print("--------------------------------\n")
+    #     for x in os.environ:
+    #         print(f"{x}: {os.environ[x]}\n")
+    #     sys.exit()
 
-    if "form_test" in data:
-        print("content-type: text/plain\n\n")
-        for x in data:
-            print(f"{x}: {data[x]}\n")
-        print("--------------------------------\n")
-        for x in os.environ:
-            print(f"{x}: {os.environ[x]}\n")
-        sys.exit()
+    # if 'sp' in data:
+    #     import json
+    #     from ssph_server.db import core_db
 
-    if 'sp' in data:
-        import json
-        from ssph_server.db import core_db
+    #     dbcreds = data['dbcreds'].value
 
-        dbcreds = data['dbcreds'].value
+    #     if dbcreds != "":
+    #         dbcreds = json.dumps(json.loads(dbcreds))
 
-        if dbcreds != "":
-            dbcreds = json.dumps(json.loads(dbcreds))
+    #     core_db.execute("""
+    #         INSERT INTO ssph_sp_info
+    #         ( sp, url, dbtype, dbcreds, contact, email, secret, hash )
+    #         VALUES
+    #         ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
+    #         """,
+    #         (   data['sp'].value,
+    #             data['url'].value,
+    #             data['dbtype'].value,
+    #             dbcreds,
+    #             data['contact'].value,
+    #             data['email'].value,
+    #             data['secret'].value,
+    #             data['hash'].value
+    #         )
+    #     )
 
-        core_db.execute("""
-            INSERT INTO ssph_sp_info
-            ( sp, url, dbtype, dbcreds, contact, email, secret, hash )
-            VALUES
-            ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
-            """,
-            (   data['sp'].value,
-                data['url'].value,
-                data['dbtype'].value,
-                dbcreds,
-                data['contact'].value,
-                data['email'].value,
-                data['secret'].value,
-                data['hash'].value
-            )
-        )
+    #     core_db.commit()
+    #     print("content-type: text/plain\n\ndone")
+    #     sys.exit()
 
-        core_db.commit()
-        print("content-type: text/plain\n\ndone")
-        sys.exit()
+    # if 'delete_sp' in data:
+    #     from ssph_server.db import core_db
+    #     c = core_db.execute("DELETE FROM ssph_sp_info WHERE sp = :1 ",
+    #         (data['delete_sp'].value,)
+    #         )
+    #     core_db.commit()
+    #     print("content-type: text/plain\n\ndone")
+    #     sys.exit()
 
-    if 'delete_sp' in data:
-        from ssph_server.db import core_db
-        c = core_db.execute("DELETE FROM ssph_sp_info WHERE sp = :1 ",
-            (data['delete_sp'].value,)
-            )
-        core_db.commit()
-        print("content-type: text/plain\n\ndone")
-        sys.exit()
+    # if 'listsp' in data:
+    #     t = listtb('ssph_sp_info', order_by='ORDER BY sp')
+    #     print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
+    #     sys.exit()
 
-    if 'listsp' in data:
-        t = listtb('ssph_sp_info', order_by='ORDER BY sp')
-        print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
-        sys.exit()
-
-    if 'listau' in data:
-        t = listtb('ssph_auth_events', 'ORDER BY tyme DESC LIMIT 100')
-        print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
-        sys.exit()
+    # if 'listau' in data:
+    #     t = listtb('ssph_auth_events', 'ORDER BY tyme DESC LIMIT 100')
+    #     print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
+    #     sys.exit()
 
     # None of the CGI parameters were present, so this is not a form
     # submission.  Show the user the form.
-    print("content-type: text/html\n\n{}".format(html_page))
-    sys.exit()
+    return "content-type: text/html\n\n{}".format(html_page)
 
 def listtb(table, order_by=''):
     c = core_db.execute("select * from %s %s" % (table, order_by))
