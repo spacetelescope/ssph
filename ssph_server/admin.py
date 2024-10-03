@@ -37,7 +37,7 @@ from ssph_server.db import core_db
 from ssph_server.admin_text import html_page
 
 def run(data):
-
+    
     # BUG: include the IDP in this test
     if not (os.environ.get("Shib_Identity_Provider"), os.environ.get('STScI_UUID')) in permitted_users:
         msg = "status: 500\ncontent-type: text/plain\n"
@@ -45,7 +45,7 @@ def run(data):
         msg += f"you are {os.environ["Shib_Identity_Provider"]}, {os.environ['STScI_UUID']}" 
         return msg
 
-    if 'listsp' in data:
+    if 'listsp'in data:
         t = listtb('ssph_sp_info', order_by='ORDER BY sp')
         return "content-type: text/html\n\n{}".format(t.get_html(headings=True))
 
@@ -66,12 +66,10 @@ def run(data):
         set_db_pass(data)
     
     elif 'get_db_pass' in data:
-        get_db_pass(data)
+        get_db_pass()
     
     else:
-        # None of the CGI parameters were present, so this is not a form
-        # submission.  Show the user the form.
-        return "content-type: text/html\n\n{}".format(html_page)
+        return show_form()
 
 def listtb(table, order_by=''):
     c = core_db.execute("select * from %s %s" % (table, order_by))
@@ -130,7 +128,7 @@ def form_test(data):
         print(f"{x}: {os.environ[x]}\n")
     sys.exit()
 
-def get_db_pass(data):
+def get_db_pass():
     from ssph_server.db import password_file
     with open(password_file,"r") as pswdfile:
         pswd = pswdfile.read()
@@ -143,3 +141,8 @@ def set_db_pass(data):
     f.write(data['db_pass'])
     f.close()
     return "content-type: text/plain\n\ndone"
+
+def show_form():
+    # None of the CGI parameters were present, so this is not a form
+    # submission.  Show the user the form.
+    return "content-type: text/html\n\n{}".format(html_page)

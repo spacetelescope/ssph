@@ -19,6 +19,7 @@ def process_data():
         data = request.args
     elif request.method == "POST":
         data = request.form
+    return data
 
 @app.route("/secure/ssph_admin.cgi", methods=["GET", "POST"])
 def admin_page():
