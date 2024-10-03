@@ -54,19 +54,19 @@ def run(data):
         return "content-type: text/html\n\n{}".format(t.get_html(headings=True))
 
     elif "sp" in data:
-        add_sp(data)
+        return add_sp(data)
 
     elif 'delete_sp' in data:
-        delete_sp(data)
+        return delete_sp(data)
 
     elif 'form_test' in data:
-        form_test(data)
+        return form_test(data)
 
     elif 'db_pass' in data:
-        set_db_pass(data)
+        return set_db_pass(data)
     
     elif 'get_db_pass' in data:
-        get_db_pass()
+        return get_db_pass()
     
     else:
         return show_form()
@@ -120,13 +120,13 @@ def delete_sp(data):
     return "content-type: text/plain\n\ndone"
 
 def form_test(data):
-    print("content-type: text/plain\n\n")
+    msg = "content-type: text/plain\n\n"
     for x in data:
-        print(f"{x}: {data[x]}\n")
-    print("--------------------------------\n")
+        msg += f"{x}: {data[x]}\n"
+    msg += "--------------------------------\n"
     for x in os.environ:
-        print(f"{x}: {os.environ[x]}\n")
-    sys.exit()
+        msg += f"{x}: {os.environ[x]}\n"
+    return msg
 
 def get_db_pass():
     from ssph_server.db import password_file
