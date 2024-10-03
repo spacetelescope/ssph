@@ -72,6 +72,14 @@ def run():
         f.close()
         sys.exit()
 
+    if "form_test" in data:
+        print("content-type: text/plain\n\n")
+        for x in data:
+            print(f"{x}: {data[x]}\n")
+        print("--------------------------------\n")
+        for x in os.environ:
+            print(f"{x}: {os.environ[x]}\n")
+        sys.exit()
 
     if 'sp' in data:
         import json
