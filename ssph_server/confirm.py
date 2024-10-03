@@ -10,7 +10,6 @@ For extra bonus security, we could keep an IP list of servers that
 host each SP, but I don't think it is worth the extra work.
 
 """
-import cgi
 import hashlib
 import json
 import os
@@ -70,21 +69,17 @@ def _barf(data, message):
 #
 #
 
-def run():
+def run(data):
     # checking that the client is in the network range that we expect
     # to serve
     remote_addr = os.getenv("REMOTE_ADDR", '')
     ###
 
-    # Collect the fields of the query that was passed by the client.
-    # Quietly ignore unexpected fields.
-    data = cgi.FieldStorage()
-
-    sp = data["sp"].value
+    sp = data["sp"]
         # the name of the SP that is the client here
-    evid = data["evid"].value
+    evid = data["evid"]
         # the session authentication event id being validated
-    signature = data["sig"].value
+    signature = data["sig"]
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
@@ -234,5 +229,4 @@ def run():
     # send back 1 line of signature, then arbitrarily long information.
     # (in practice, it is usually a single line of json, but it might
     # be multi-line if somebody pretty printed it into the database.)
-    print("content-type: text/plain\n\n{}\n{}".format(signature, attribs))
-    sys.exit()
+    return "content-type: text/plain\n\n{}\n{}".format(signature, attribs)
