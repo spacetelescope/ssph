@@ -59,7 +59,7 @@ html_page = """
 <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 <hr>
 <form action='/secure/ssph_admin.cgi' method=post>
-<input type=submit name=submit value="Test Form Input>
+<input type=submit name=submit value="Test Form Input">
 <input type=text name=form_test size=80>
 </form>
 
