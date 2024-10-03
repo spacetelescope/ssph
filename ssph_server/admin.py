@@ -41,7 +41,7 @@ from ssph_server.admin_text import html_page
 
 app = Flask(__name__)
 
-@app.route("/ssph_admin.cgi", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def run():
     # BUG: include the IDP in this test
     if not (os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']) in permitted_users:
