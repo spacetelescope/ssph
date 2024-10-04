@@ -10,7 +10,6 @@ For extra bonus security, we could keep an IP list of servers that
 host each SP, but I don't think it is worth the extra work.
 
 """
-import cgi
 import hashlib
 import json
 import os
@@ -19,10 +18,13 @@ import ipaddress
 from datetime import datetime
 from dateutil import parser, tz
 
+from django.http import HttpResponse
+
 # this file contains the list of subnet (private / public / DMZ) IPv4 CIDRs 
 # for each mission and envrionment type (say JWST SB, DEV, OPS and HST DEV, OPS)
 # for JWST SB, we use Elastic IPs instead of CIDRs (b/c SB was built based on Legacy)
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
+urlfile = "/Users/riedel/pandeia_b/src/ssph/ssph_server/urllist.json"
 
 with open(urlfile,'r') as servicefile:
     service_net = json.load(servicefile)
@@ -42,7 +44,6 @@ debug = True
 
 def _barf(data, message):
     # if there is a reason to barf, we will just tell the client "barf"
-    print("Content-type: text/plain\n\nbarf\n")
 
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
     remote = os.getenv("REMOTE_ADDR", '')
@@ -60,8 +61,8 @@ def _barf(data, message):
     sys.stderr.flush()
 
     # add your own alerting here if you want some.
-
-    return
+    # if there is a reason to barf, we will just tell the client "barf"
+    return HttpResponse("barf")
 
 
 #####
@@ -70,21 +71,19 @@ def _barf(data, message):
 #
 #
 
-def run():
+def run(request):
+
+    data = request.GET
     # checking that the client is in the network range that we expect
     # to serve
     remote_addr = os.getenv("REMOTE_ADDR", '')
     ###
 
-    # Collect the fields of the query that was passed by the client.
-    # Quietly ignore unexpected fields.
-    data = cgi.FieldStorage()
-
-    sp = data["sp"].value
+    sp = data["sp"]
         # the name of the SP that is the client here
-    evid = data["evid"].value
+    evid = data["evid"]
         # the session authentication event id being validated
-    signature = data["sig"].value
+    signature = data["sig"]
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
@@ -234,5 +233,4 @@ def run():
     # send back 1 line of signature, then arbitrarily long information.
     # (in practice, it is usually a single line of json, but it might
     # be multi-line if somebody pretty printed it into the database.)
-    print("content-type: text/plain\n\n{}\n{}".format(signature, attribs))
-    sys.exit()
+    return HttpResponse(f"{signature}\n{attribs}", content_type="text/plain")

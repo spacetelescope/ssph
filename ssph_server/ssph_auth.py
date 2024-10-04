@@ -32,19 +32,16 @@ else:
 debug = False
 
 import sys
-import cgi
 import os
 import re
 import json
 import time
-import datetime
+from datetime import datetime
 import re
 
-from ssph_server.db import core_db
+from django.http import HttpResponse
 
-if debug:
-    import cgitb
-    cgitb.enable()
+from ssph_server.db import core_db
 
 # This function creates an identifier for the newly authenticated session.
 #
@@ -78,28 +75,27 @@ def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed):
 #
 # The main program
 #
-def run():
+def run(request):
     # To get through all the redirects from the SP, through Shibboleth, and back
     # to here, we use a single parameter in a GET-style CGI request.
     # After the authentication, that single parameter comes here as
     # sp=... giving the name of the service provider that is requesting
     # service.
 
-    data = cgi.FieldStorage()
+    data = request.GET
 
     if "sp" in data:
-        sp = data["sp"].value.strip()
+        sp = data["sp"].strip()
     else:
-        print("Content-type: text/plain\n")
         if debug:
-            print("SSO did not return the SP field")
-            print("CGI ARGS")
+            msg = "SSO did not return the SP field\n"
+            msg += "CGI ARGS\n"
             for x in data:
-                print(data[x].value)
-            print("ENVIRONMENT")
+                msg += f"{data[x]}\n"
+            msg += "\nENVIRONMENT\n"
             for x in sorted([x for x in os.environ]):
-                print("%s=%s"%(x,os.environ[x]))
-        sys.exit()
+                msg += "%s=%s\n"%(x,os.environ[x])
+        return HttpResponse(msg, content_type="text/plain")
 
     # sp is now the name of the service provider
 
@@ -115,16 +111,16 @@ def run():
 
     if ans is None:
         # hm - we do not know your SP; you lose.
-        print("Content-type: text/plain\n")
+        msg = "Content-type: text/plain\n"
         if debug:
-            print("Do not know your application: ",sp)
+            msg += f"Do not know your application: {sp}"
         sys.stderr.write(
             "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
-            % (sp, datetime.datetime.now().isoformat())
+            % (sp, datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             )
         sys.stderr.flush()
 
-        sys.exit()
+        return msg
 
     return_url, dbtype, dbcreds = ans
 
@@ -189,7 +185,7 @@ def run():
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
     # about time zones.
-    tyme = datetime.datetime.utcnow().isoformat(' ')
+    tyme = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
     sys.stderr.write(tyme)
     sys.stderr.flush()
@@ -221,6 +217,4 @@ def run():
     ###
     # Redirect the user back to the SP.
 
-    print("Status: 303 See Other\nLocation: {}\n".format(return_url))
-
-    sys.exit()
+    return HttpResponse("Status: 303 See Other\nLocation: {}\n".format(return_url))
