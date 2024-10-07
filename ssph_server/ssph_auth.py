@@ -217,4 +217,4 @@ def run(request):
     ###
     # Redirect the user back to the SP.
 
-    return HttpResponse("Status: 303 See Other\nLocation: {}\n".format(return_url))
+    return HttpResponse(return_url)
