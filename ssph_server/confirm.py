@@ -24,7 +24,7 @@ from django.http import HttpResponse
 # for each mission and envrionment type (say JWST SB, DEV, OPS and HST DEV, OPS)
 # for JWST SB, we use Elastic IPs instead of CIDRs (b/c SB was built based on Legacy)
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
-urlfile = "/Users/riedel/pandeia_b/src/ssph/ssph_server/urllist.json"
+#urlfile = "/Users/riedel/pandeia_b/src/ssph/ssph_server/urllist.json"
 
 with open(urlfile,'r') as servicefile:
     service_net = json.load(servicefile)
