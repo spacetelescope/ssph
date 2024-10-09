@@ -39,7 +39,7 @@ import time
 from datetime import datetime
 import re
 
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 
 from ssph_server.db import core_db
 
@@ -217,4 +217,4 @@ def run(request):
     ###
     # Redirect the user back to the SP.
 
-    return HttpResponse(return_url)
+    return HttpResponseRedirect(return_url)
