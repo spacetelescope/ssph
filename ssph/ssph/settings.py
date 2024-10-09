@@ -19,15 +19,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+
+from cryptography.fernet import Fernet
+django_keyfile = '/Users/riedel/pandeia_b/src/ssph_secret'
+key_file = '/Users/riedel/pandeia_b/src/ssph_key'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w&3qs#5+ypuxuii7=)(e77_6+x18ry37=fd)tuxs)vw+1i$)^8'
+try:
+    with open(django_keyfile) as f:
+        encpwd = f.readline().strip()
+        encpwdbyt = bytes(encpwd, 'utf-8')
+    f.close()
+
+    # read key and convert into byte
+    with open(key_file) as f:
+        refKey = ''.join(f.readlines())
+        refKeybyt = bytes(refKey, 'utf-8')
+    f.close()
+
+    # use the key and encrypt pwd
+    keytouse = Fernet(refKeybyt)
+    pwbyt = (keytouse.decrypt(encpwdbyt))
+    SECRET_KEY = pwbyt.decode("utf-8").strip()
+except IOError:
+    SECRET_KEY = None
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
     "plssph5.stsci.edu",
-    "plssph6.stsci.edu"
+    "plssph6.stsci.edu",
+    "127.0.0.1",
+    "127.0.0.1:8000" # TEMPORARY, FOR DEBUGGING
 ]
 
 
@@ -126,7 +151,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": "/internal/data1/other/logs/debug.log",
+            "filename": "/Users/riedel/pandeia_b/src/debug.log",
         },
     },
     "loggers": {

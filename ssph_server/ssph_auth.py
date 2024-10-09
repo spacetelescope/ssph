@@ -62,12 +62,12 @@ def create_auth_event_id():
 
 ###
 # function to insert an authentication event into the database table
-def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed):
+def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed, request):
     db.execute(
         """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, stsci_uuid, attribs, consumed )
         VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
-        (tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["STScI_UUID"], attribs, consumed)
+        (tyme, sp, auth_event_id, request.META['REMOTE_ADDR'],
+            request.META["Shib_Identity_Provider"], request.META["STScI_UUID"], attribs, consumed)
         )
     db.commit()
 
@@ -115,7 +115,7 @@ def run(request):
         if debug:
             msg += f"Do not know your application: {sp}"
         sys.stderr.write(
-            "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
+            "\n\nSSPH: unknown SP %s date: %s\n\n\n"
             % (sp, datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             )
         sys.stderr.flush()
@@ -158,8 +158,8 @@ def run(request):
     # SP that receives the authentication event.
     return_url = return_url + "?evid=" + auth_event_id
 
-    sys.stderr.write("\n\n%s" % (return_url))
-    sys.stderr.flush()
+    #sys.stderr.write("\n\n%s" % (return_url))
+    #sys.stderr.flush()
 
 
     ###
@@ -194,7 +194,7 @@ def run(request):
 
         ###
         # log the authentication event in our table. it is not consumed
-        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'N')
+        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'N', request)
 
     else:
         ###
@@ -203,7 +203,7 @@ def run(request):
 
         # consumed=D to indicate that the CGI authenticator should never
         # see a request to validate this authentication event.
-        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'D')
+        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'D', request)
 
         # if using the SP's database, we have to connect to it.
         # (exec is ok because we got dbtype from our trusted configuration data)
@@ -211,7 +211,7 @@ def run(request):
         dbcreds = json.loads(dbcreds)
         cdb = client_dbm.PandokiaDB( dbcreds )
 
-        insert_auth(cdb, tyme, sp, auth_event_id, attribs)
+        insert_auth(cdb, tyme, sp, auth_event_id, attribs, request)
 
 
     ###

@@ -43,12 +43,12 @@ except IOError:
 #####
 # database: sqlite
 # MOVE THE DATABASE LOCATION BEFORE ACTUAL USE
-if False:
+if True:
     import pandokia.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
     # of concurrent transactions.
-    core_db = d.PandokiaDB("/internal/data1/other/logs/test_db.db")
+    core_db = d.PandokiaDB("/Users/riedel/pandeia_b/src/ssph/ssph_test.db")
 
 #####
 # database: postgres
@@ -67,7 +67,7 @@ if False:
 #####
 # database: mysql
 
-if True:
+if False:
     import pandokia.db_mysqldb as d
     core_db = d.PandokiaDB( {
             'host'      : 'pljwstdbs',
