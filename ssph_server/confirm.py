@@ -32,7 +32,7 @@ with open(urlfile,'r') as servicefile:
 # bug: refuse auth for evid that is too old
 # bug: refuse auth for evid that was used before
 
-from ssph_server.db import core_db
+
 
 debug = True
 
@@ -42,12 +42,12 @@ debug = True
 # odd enough to be worth logging/alerting for.
 #
 
-def _barf(data, message):
+def _barf(data, message, request):
     # if there is a reason to barf, we will just tell the client "barf"
 
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
-    remote = os.getenv("REMOTE_ADDR", '')
-    server = os.getenv("SERVER_ADDR", '')
+    remote = request.META.get("REMOTE_ADDR", '')
+    server = request.META.get("SERVER_ADDR", '')
 
     # log to the apache error log
     sys.stderr.write(
@@ -76,7 +76,7 @@ def run(request):
     data = request.GET
     # checking that the client is in the network range that we expect
     # to serve
-    remote_addr = os.getenv("REMOTE_ADDR", '')
+    remote_addr = request.META.get("REMOTE_ADDR", "")
     ###
 
     sp = data["sp"]
@@ -93,12 +93,12 @@ def run(request):
         if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
             match = True
     if not match:
-        _barf(data,'ip-mismatch')
-        sys.exit(1)
+        barf = _barf(data,'ip-mismatch', request)
+        return barf
 
     ###
     # look up information about the service provider
-
+    from ssph_server.db import core_db
     c = core_db.execute("SELECT dbtype, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None:
@@ -228,6 +228,8 @@ def run(request):
     m.update(' '.encode('utf-8'))
     m.update(secret.encode('utf-8'))
     signature = m.hexdigest()
+
+    del core_db
 
     ###
     # send back 1 line of signature, then arbitrarily long information.

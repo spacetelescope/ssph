@@ -32,7 +32,6 @@ import sys
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
 import pandokia.text_table
-from ssph_server.db import core_db
 
 #from ssph.templates.admin_text import html_page
 
@@ -84,6 +83,7 @@ def run(request):
         return show_form(request)
 
 def listtb(table, order_by=''):
+    from ssph_server.db import core_db
     c = core_db.execute("select * from %s %s" % (table, order_by))
     t = pandokia.text_table.text_table()
     t.set_html_table_attributes("border=1")
@@ -92,6 +92,7 @@ def listtb(table, order_by=''):
     for row, x in enumerate(c):
         for col, value in enumerate(x):
             t.set_value(row, col, value )
+    del core_db
     return t
 
 def add_sp(data):
@@ -121,6 +122,7 @@ def add_sp(data):
     )
 
     core_db.commit()
+    del core_db
     t = listtb('ssph_sp_info', order_by='ORDER BY sp')
     return HttpResponse(t)
 
@@ -130,6 +132,7 @@ def delete_sp(data):
         (data['delete_sp'],)
         )
     core_db.commit()
+    del core_db
     t = listtb('ssph_sp_info', order_by='ORDER BY sp')
     return HttpResponse(t.get_html(headings=True))
 

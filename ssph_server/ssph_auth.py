@@ -39,9 +39,7 @@ import time
 from datetime import datetime
 import re
 
-from django.http import HttpResponseRedirect
-
-from ssph_server.db import core_db
+from django.http import HttpResponse, HttpResponseRedirect
 
 # This function creates an identifier for the newly authenticated session.
 #
@@ -102,7 +100,9 @@ def run(request):
     # validate sp; make sure the string only contains alphanumeric characters,
     # dashes, underscores, and periods
     if not re.match("^[A-Za-z0-9_:.-]*$", sp):
-        sys.exit(1)
+        HttpResponse("Invalid SP")
+
+    from ssph_server.db import core_db
 
     ###
     # look up information about the service provider
@@ -120,6 +120,7 @@ def run(request):
             )
         sys.stderr.flush()
 
+        del core_db
         return msg
 
     return_url, dbtype, dbcreds = ans
@@ -157,9 +158,6 @@ def run(request):
     # url is where we will return the user to.  It is the part of the
     # SP that receives the authentication event.
     return_url = return_url + "?evid=" + auth_event_id
-
-    #sys.stderr.write("\n\n%s" % (return_url))
-    #sys.stderr.flush()
 
 
     ###
@@ -213,8 +211,10 @@ def run(request):
 
         insert_auth(cdb, tyme, sp, auth_event_id, attribs, request)
 
+        del cdb
 
     ###
     # Redirect the user back to the SP.
+    del core_db
 
     return HttpResponseRedirect(return_url)
