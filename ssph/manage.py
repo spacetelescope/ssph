@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/internal/data1/other/third_party/envs/pandeia_17/bin/python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

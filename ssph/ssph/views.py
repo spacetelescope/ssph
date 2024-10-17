@@ -1,7 +1,7 @@
 import sys
 from os import environ
 from re import match, compile
-sys.path.append("/Users/riedel/pandeia_b/src/ssph")
+sys.path.append("/internal/data1/other/pylibs/ssph")
 
 from django.http import HttpResponse
 

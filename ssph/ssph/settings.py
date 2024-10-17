@@ -21,8 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 from cryptography.fernet import Fernet
-django_keyfile = '/Users/riedel/pandeia_b/src/ssph_secret'
-key_file = '/Users/riedel/pandeia_b/src/ssph_key'
+django_keyfile = '/internal/data1/other/config/ssph_secret'
+key_file = '/internal/data1/other/config/ssph_key'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
