@@ -151,7 +151,7 @@ LOGGING = {
         "file": {
             "level": "DEBUG",
             "class": "logging.FileHandler",
-            "filename": "/Users/riedel/pandeia_b/src/debug.log",
+            "filename": "/internal/data1/other/logs/debug.log",
         },
     },
     "loggers": {
