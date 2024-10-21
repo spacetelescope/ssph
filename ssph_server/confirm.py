@@ -10,7 +10,6 @@ For extra bonus security, we could keep an IP list of servers that
 host each SP, but I don't think it is worth the extra work.
 
 """
-import cgi
 import hashlib
 import json
 import os
@@ -19,10 +18,13 @@ import ipaddress
 from datetime import datetime
 from dateutil import parser, tz
 
+from django.http import HttpResponse
+
 # this file contains the list of subnet (private / public / DMZ) IPv4 CIDRs 
 # for each mission and envrionment type (say JWST SB, DEV, OPS and HST DEV, OPS)
 # for JWST SB, we use Elastic IPs instead of CIDRs (b/c SB was built based on Legacy)
 urlfile = '/internal/data1/other/pylibs/ssph/ssph_server/urllist.json'
+#urlfile = "/Users/riedel/pandeia_b/src/ssph/ssph_server/urllist.json"
 
 with open(urlfile,'r') as servicefile:
     service_net = json.load(servicefile)
@@ -30,7 +32,7 @@ with open(urlfile,'r') as servicefile:
 # bug: refuse auth for evid that is too old
 # bug: refuse auth for evid that was used before
 
-from ssph_server.db import core_db
+
 
 debug = True
 
@@ -40,13 +42,12 @@ debug = True
 # odd enough to be worth logging/alerting for.
 #
 
-def _barf(data, message):
+def _barf(data, message, request):
     # if there is a reason to barf, we will just tell the client "barf"
-    print("Content-type: text/plain\n\nbarf\n")
 
     # Who is the remote?  Who are we?  Who did it?  Log all of these.
-    remote = os.getenv("REMOTE_ADDR", '')
-    server = os.getenv("SERVER_ADDR", '')
+    remote = request.META.get("REMOTE_ADDR", '')
+    server = request.META.get("SERVER_ADDR", '')
 
     # log to the apache error log
     sys.stderr.write(
@@ -60,8 +61,8 @@ def _barf(data, message):
     sys.stderr.flush()
 
     # add your own alerting here if you want some.
-
-    return
+    # if there is a reason to barf, we will just tell the client "barf"
+    return HttpResponse("barf")
 
 
 #####
@@ -70,21 +71,19 @@ def _barf(data, message):
 #
 #
 
-def run():
+def run(request):
+
+    data = request.GET
     # checking that the client is in the network range that we expect
     # to serve
-    remote_addr = os.getenv("REMOTE_ADDR", '')
+    remote_addr = request.META.get("REMOTE_ADDR", "")
     ###
 
-    # Collect the fields of the query that was passed by the client.
-    # Quietly ignore unexpected fields.
-    data = cgi.FieldStorage()
-
-    sp = data["sp"].value
+    sp = data["sp"]
         # the name of the SP that is the client here
-    evid = data["evid"].value
+    evid = data["evid"]
         # the session authentication event id being validated
-    signature = data["sig"].value
+    signature = data["sig"]
         # the hash computed by the client of the input for this request
 
     ### write your own if statements here
@@ -94,12 +93,12 @@ def run():
         if ipaddress.ip_address(str(remote_addr)) in ipaddress.ip_network(str(url)):
             match = True
     if not match:
-        _barf(data,'ip-mismatch')
-        sys.exit(1)
+        barf = _barf(data,'ip-mismatch', request)
+        return barf
 
     ###
     # look up information about the service provider
-
+    from ssph_server.db import core_db
     c = core_db.execute("SELECT dbtype, secret, hash FROM ssph_sp_info WHERE sp = :1",(sp,))
     ans = c.fetchone()
     if ans is None:
@@ -230,9 +229,10 @@ def run():
     m.update(secret.encode('utf-8'))
     signature = m.hexdigest()
 
+    del core_db
+
     ###
     # send back 1 line of signature, then arbitrarily long information.
     # (in practice, it is usually a single line of json, but it might
     # be multi-line if somebody pretty printed it into the database.)
-    print("content-type: text/plain\n\n{}\n{}".format(signature, attribs))
-    sys.exit()
+    return HttpResponse(f"{signature}\n{attribs}", content_type="text/plain")
