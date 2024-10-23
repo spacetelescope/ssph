@@ -211,7 +211,7 @@ def run():
 
         # if using the SP's database, we have to connect to it.
         # (exec is ok because we got dbtype from our trusted configuration data)
-        exec("import pandokia.db_%s as client_dbm" % dbtype)
+        exec("import utils.db_%s as client_dbm" % dbtype)
         dbcreds = json.loads(dbcreds)
         cdb = client_dbm.PandokiaDB( dbcreds )
 
