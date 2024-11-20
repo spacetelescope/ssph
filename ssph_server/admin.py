@@ -30,7 +30,7 @@ import sys
 import cgi
 import os
 import cgitb
-import utils.text_table
+import etc_utils.text_table
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
 from ssph_server.db import core_db
@@ -129,7 +129,7 @@ def run():
 
 def listtb(table, order_by=''):
     c = core_db.execute("select * from %s %s" % (table, order_by))
-    t = utils.text_table.text_table()
+    t = etc_utils.text_table.text_table()
     t.set_html_table_attributes("border=1")
     for col, name in enumerate(c.description):
         t.define_column( name, col, html=name[0] )
