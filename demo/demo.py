@@ -19,9 +19,9 @@ if 1 :
 
 # This is the database used by this demo application, no matter which
 # confirmation method you choose above.
-import pandokia.db_mysqldb
+import etc_utils.db_mysqldb
 
-db = pandokia.db_mysqldb.PandokiaDB(
+db = etc_utils.db_mysqldb.PandokiaDB(
     {
     "host"      : "banana.stsci.edu",
     "user"      : "ssph_demo_user",
