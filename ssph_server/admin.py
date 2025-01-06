@@ -26,108 +26,64 @@ permitted_users = (
 # no edit beyond here
 #######
 
-import sys
-import cgi
 import os
-import cgitb
-import etc_utils.text_table
+import sys
+
 # unremarkable way to shove the database table into a pandokia
 # text_table and then display it as html.
-from ssph_server.db import core_db
+import etc_utils.text_table
 
-cgitb.enable(display=0, logdir="/internal/data1/other/logs")
+#from ssph.templates.admin_text import html_page
 
-from ssph_server.admin_text import html_page
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 
-def run():
+def process_data(request):
+    if request.method == "GET":
+        data = request.GET
+    elif request.method == "POST":
+        data = request.POST
+    return data
+
+def run(request):
+    
+    data = process_data(request)
+
     # BUG: include the IDP in this test
-    if not (os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID']) in permitted_users:
-        print("status: 500\ncontent-type: text/plain\n")
-        print("\nlogged in but not permitted to admin\n")
-        print("you are ", os.environ["Shib_Identity_Provider"], os.environ['STScI_UUID'])
-        sys.exit(1)
-
-    # we never get here unless we are authorized IT people, so it is ok
-    # to enable tracebacks.  It is easier than providing proper error
-    # messages.
-    import cgitb
-    cgitb.enable(display=0, logdir="/internal/data1/other/logs")
-
-    # get the cgi parameters
-    data = cgi.FieldStorage()
-
-    if 'db_pass' in data:
-        from ssph_server.db import password_file
-        f=open(password_file,"w")
-        os.chmod(password_file, 0o600)
-        f.write(data['db_pass'].value)
-        f.close()
-        print("content-type: text/plain\n\ndone")
-        sys.exit()
-
-    if 'get_db_pass' in data:
-        from ssph_server.db import password_file
-        f=open(password_file,"r")
-        print("content-type: text/plain\n\n{}".format(f.read()))
-        f.close()
-        sys.exit()
-
-
-    if 'sp' in data:
-        import json
-        from ssph_server.db import core_db
-
-        dbcreds = data['dbcreds'].value
-
-        if dbcreds != "":
-            dbcreds = json.dumps(json.loads(dbcreds))
-
-        core_db.execute("""
-            INSERT INTO ssph_sp_info
-            ( sp, url, dbtype, dbcreds, contact, email, secret, hash )
-            VALUES
-            ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
-            """,
-            (   data['sp'].value,
-                data['url'].value,
-                data['dbtype'].value,
-                dbcreds,
-                data['contact'].value,
-                data['email'].value,
-                data['secret'].value,
-                data['hash'].value
-            )
-        )
-
-        core_db.commit()
-        print("content-type: text/plain\n\ndone")
-        sys.exit()
-
-    if 'delete_sp' in data:
-        from ssph_server.db import core_db
-        c = core_db.execute("DELETE FROM ssph_sp_info WHERE sp = :1 ",
-            (data['delete_sp'].value,)
-            )
-        core_db.commit()
-        print("content-type: text/plain\n\ndone")
-        sys.exit()
+    if not (os.environ.get("Shib_Identity_Provider"), os.environ.get('STScI_UUID')) in permitted_users:
+        msg = "status: 500\ncontent-type: text/plain\n"
+        msg += "\nlogged in but not permitted to admin\n"
+        msg += f"you are {os.environ["Shib_Identity_Provider"]}, {os.environ['STScI_UUID']}" 
+        return HttpResponse(msg)
 
     if 'listsp' in data:
         t = listtb('ssph_sp_info', order_by='ORDER BY sp')
-        print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
-        sys.exit()
+        return HttpResponse(t.get_html(headings=True))
 
-    if 'listau' in data:
+    elif 'listau' in data:
         t = listtb('ssph_auth_events', 'ORDER BY tyme DESC LIMIT 100')
-        print("content-type: text/html\n\n{}".format(t.get_html(headings=True)))
-        sys.exit()
+        return HttpResponse(t.get_html(headings=True))
 
-    # None of the CGI parameters were present, so this is not a form
-    # submission.  Show the user the form.
-    print("content-type: text/html\n\n{}".format(html_page))
-    sys.exit()
+    elif "sp" in data:
+        return add_sp(data)
+
+    elif 'delete_sp' in data:
+        return delete_sp(data)
+
+    elif 'form_test' in data:
+        return form_test(data)
+
+    elif 'db_pass' in data:
+        return set_db_pass(data)
+    
+    elif 'get_db_pass' in data:
+        return get_db_pass()
+    
+    else:
+        return show_form(request)
 
 def listtb(table, order_by=''):
+    from ssph_server.db import core_db
     c = core_db.execute("select * from %s %s" % (table, order_by))
     t = etc_utils.text_table.text_table()
     t.set_html_table_attributes("border=1")
@@ -136,4 +92,75 @@ def listtb(table, order_by=''):
     for row, x in enumerate(c):
         for col, value in enumerate(x):
             t.set_value(row, col, value )
+    del core_db
     return t
+
+def add_sp(data):
+    import json
+    from ssph_server.db import core_db
+
+    dbcreds = data['dbcreds']
+
+    if dbcreds != "":
+        dbcreds = json.dumps(json.loads(dbcreds))
+
+    core_db.execute("""
+        INSERT INTO ssph_sp_info
+        ( sp, url, dbtype, dbcreds, contact, email, secret, hash )
+        VALUES
+        ( :1, :2, :3,      :4,      :5,     :6,      :7,    :8 )
+        """,
+        (   data['sp'],
+            data['url'],
+            data['dbtype'],
+            dbcreds,
+            data['contact'],
+            data['email'],
+            data['secret'],
+            data['hash']
+        )
+    )
+
+    core_db.commit()
+    del core_db
+    t = listtb('ssph_sp_info', order_by='ORDER BY sp')
+    return HttpResponse(t)
+
+def delete_sp(data):
+    from ssph_server.db import core_db
+    c = core_db.execute("DELETE FROM ssph_sp_info WHERE sp = :1 ",
+        (data['delete_sp'],)
+        )
+    core_db.commit()
+    del core_db
+    t = listtb('ssph_sp_info', order_by='ORDER BY sp')
+    return HttpResponse(t.get_html(headings=True))
+
+def form_test(data):
+    msg = "content-type: text/plain\n\n"
+    for x in data:
+        msg += f"{x}: {data[x]}\n"
+    msg += "--------------------------------\n"
+    for x in os.environ:
+        msg += f"{x}: {os.environ[x]}\n"
+    return HttpResponse(msg, content_type="text/plain")
+
+def get_db_pass():
+    from ssph_server.db import password_file
+    with open(password_file,"r") as pswdfile:
+        pswd = pswdfile.read()
+    return HttpResponse(pswd, content_type="text/plain")
+
+def set_db_pass(data):
+    from ssph_server.db import password_file
+    f=open(password_file,"w")
+    os.chmod(password_file, 0o600)
+    f.write(data['db_pass'])
+    f.close()
+    return HttpResponse("done", content_type="text/plain")
+
+def show_form(request):
+    # None of the CGI parameters were present, so this is not a form
+    # submission.  Show the user the form.
+    context = {}
+    return render(request, "admin_text.html", context)

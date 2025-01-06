@@ -32,19 +32,14 @@ else:
 debug = False
 
 import sys
-import cgi
 import os
 import re
 import json
 import time
-import datetime
+from datetime import datetime
 import re
 
-from ssph_server.db import core_db
-
-if debug:
-    import cgitb
-    cgitb.enable()
+from django.http import HttpResponse, HttpResponseRedirect
 
 # This function creates an identifier for the newly authenticated session.
 #
@@ -65,12 +60,12 @@ def create_auth_event_id():
 
 ###
 # function to insert an authentication event into the database table
-def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed):
+def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed, request):
     db.execute(
         """INSERT INTO ssph_auth_events ( tyme, sp, auth_event_id, client_ip, idp, stsci_uuid, attribs, consumed )
         VALUES ( :1, :2, :3, :4, :5, :6, :7, :8 ) """,
-        (tyme, sp, auth_event_id, os.environ['REMOTE_ADDR'],
-            os.environ["Shib_Identity_Provider"], os.environ["STScI_UUID"], attribs, consumed)
+        (tyme, sp, auth_event_id, request.META['REMOTE_ADDR'],
+            request.META["Shib_Identity_Provider"], request.META["STScI_UUID"], attribs, consumed)
         )
     db.commit()
 
@@ -78,35 +73,36 @@ def insert_auth(db, tyme, sp, auth_event_id, attribs, consumed):
 #
 # The main program
 #
-def run():
+def run(request):
     # To get through all the redirects from the SP, through Shibboleth, and back
     # to here, we use a single parameter in a GET-style CGI request.
     # After the authentication, that single parameter comes here as
     # sp=... giving the name of the service provider that is requesting
     # service.
 
-    data = cgi.FieldStorage()
+    data = request.GET
 
     if "sp" in data:
-        sp = data["sp"].value.strip()
+        sp = data["sp"].strip()
     else:
-        print("Content-type: text/plain\n")
         if debug:
-            print("SSO did not return the SP field")
-            print("CGI ARGS")
+            msg = "SSO did not return the SP field\n"
+            msg += "CGI ARGS\n"
             for x in data:
-                print(data[x].value)
-            print("ENVIRONMENT")
+                msg += f"{data[x]}\n"
+            msg += "\nENVIRONMENT\n"
             for x in sorted([x for x in os.environ]):
-                print("%s=%s"%(x,os.environ[x]))
-        sys.exit()
+                msg += "%s=%s\n"%(x,os.environ[x])
+        return HttpResponse(msg, content_type="text/plain")
 
     # sp is now the name of the service provider
 
     # validate sp; make sure the string only contains alphanumeric characters,
     # dashes, underscores, and periods
     if not re.match("^[A-Za-z0-9_:.-]*$", sp):
-        sys.exit(1)
+        HttpResponse("Invalid SP")
+
+    from ssph_server.db import core_db
 
     ###
     # look up information about the service provider
@@ -115,16 +111,17 @@ def run():
 
     if ans is None:
         # hm - we do not know your SP; you lose.
-        print("Content-type: text/plain\n")
+        msg = "Content-type: text/plain\n"
         if debug:
-            print("Do not know your application: ",sp)
+            msg += f"Do not know your application: {sp}"
         sys.stderr.write(
-            "\n\n\SSPH: unknown SP %s date: %s\n\n\n"
-            % (sp, datetime.datetime.now().isoformat())
+            "\n\nSSPH: unknown SP %s date: %s\n\n\n"
+            % (sp, datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
             )
         sys.stderr.flush()
 
-        sys.exit()
+        del core_db
+        return msg
 
     return_url, dbtype, dbcreds = ans
 
@@ -162,9 +159,6 @@ def run():
     # SP that receives the authentication event.
     return_url = return_url + "?evid=" + auth_event_id
 
-    sys.stderr.write("\n\n%s" % (return_url))
-    sys.stderr.flush()
-
 
     ###
     # attribs is all the information there is to report about the user.
@@ -189,7 +183,7 @@ def run():
     # We store the time of the authentication event in ISO format,
     # but with a space instead of a 'T'.  Use UTC to avoid worrying
     # about time zones.
-    tyme = datetime.datetime.utcnow().isoformat(' ')
+    tyme = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
     sys.stderr.write(tyme)
     sys.stderr.flush()
@@ -198,7 +192,7 @@ def run():
 
         ###
         # log the authentication event in our table. it is not consumed
-        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'N')
+        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'N', request)
 
     else:
         ###
@@ -207,7 +201,7 @@ def run():
 
         # consumed=D to indicate that the CGI authenticator should never
         # see a request to validate this authentication event.
-        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'D')
+        insert_auth(core_db, tyme, sp, auth_event_id, attribs, 'D', request)
 
         # if using the SP's database, we have to connect to it.
         # (exec is ok because we got dbtype from our trusted configuration data)
@@ -215,12 +209,12 @@ def run():
         dbcreds = json.loads(dbcreds)
         cdb = client_dbm.PandokiaDB( dbcreds )
 
-        insert_auth(cdb, tyme, sp, auth_event_id, attribs)
+        insert_auth(cdb, tyme, sp, auth_event_id, attribs, request)
 
+        del cdb
 
     ###
     # Redirect the user back to the SP.
+    del core_db
 
-    print("Status: 303 See Other\nLocation: {}\n".format(return_url))
-
-    sys.exit()
+    return HttpResponseRedirect(return_url)
