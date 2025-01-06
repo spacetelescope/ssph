@@ -1,6 +1,6 @@
 import os
 import json
-import pandokia.helpers.web as web
+import etc_utils.helpers.web as web
 import hashlib
 
 default_url = 'https://ssph.stsci.edu/unsecured/ssph_confirm.cgi'

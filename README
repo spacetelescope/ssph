@@ -112,7 +112,7 @@ Installing SSPH (for Pandeia Server usage)
 SSPH is a set of small python programs.
 
 The specific dependencies are:
-pandokia
+etc_utils package from pandokia
 dateutil
 
 for Microsoft SQL Server support:

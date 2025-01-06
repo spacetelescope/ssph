@@ -44,7 +44,7 @@ except IOError:
 # database: sqlite
 # MOVE THE DATABASE LOCATION BEFORE ACTUAL USE
 if False:
-    import pandokia.db_sqlite as d
+    import etc_utils.db_sqlite as d
     # sqlite only needs a file, but it needs read/write on the file and
     # the directory it is in.  sqlite is not very good at handling lots
     # of concurrent transactions.
@@ -54,7 +54,7 @@ if False:
 # database: postgres
 
 if False:
-    import pandokia.db_psycopg2 as d
+    import etc_utils.db_psycopg2 as d
     core_db = d.PandokiaDB( {
         'host'      : 'banana.stsci.edu',
         'port'      : 5432,
@@ -68,7 +68,7 @@ if False:
 # database: mysql
 
 if True:
-    import pandokia.db_mysqldb as d
+    import etc_utils.db_mysqldb as d
     core_db = d.PandokiaDB( {
             'host'      : 'pljwstdbs',
             'port'      : 3306,
@@ -85,7 +85,7 @@ if True:
 if False:
     # set environ before the import -- oops, too late!
     # os.environ['TDSVER'] = '8.0'
-    import pandokia.db_pymssql as d
+    import etc_utils.db_pymssql as d
     core_db = d.PandokiaDB( {
             'user'          : 'ssph_server',
             'server'        : 'gatordb',
